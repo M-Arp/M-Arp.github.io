@@ -101,12 +101,14 @@
             .catch(error => console.error('Error fetching team data:', error));
 
         // Display players with Rank | Name | Position format
- function displayPlayers(players) {
+        function displayPlayers(players) {
             const playersContainer = document.getElementById('players');
-            playersContainer.innerHTML = ''; // Clear existing players
-            const start = currentPlayerOffset * 25; // Calculate start index for current offset
-            const end = Math.min(start + 25, players.length); // Calculate end index
 
+            // Only add players that fall within the currentPlayerOffset range
+            const start = currentPlayerOffset * playersPerPage;
+            const end = Math.min(start + playersPerPage, players.length);
+
+            // Check if we have players to show
             for (let i = start; i < end; i++) {
                 const player = players[i];
                 const playerDiv = document.createElement('div');
@@ -116,7 +118,7 @@
                 playersContainer.appendChild(playerDiv);
             }
 
-            // Show "Show More Players" button only if there are more than 25 players
+            // Show "Show More Players" button only if there are more than what's currently displayed
             if (end < players.length) {
                 document.getElementById('showMorePlayers').style.display = 'block';
             } else {
