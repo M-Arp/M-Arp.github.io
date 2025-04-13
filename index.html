@@ -38,7 +38,7 @@
     </style>
 </head>
 <body>
-    <div class="column">
+  <div class="column">
         <h2>Player Pool</h2>
         <input id="filterInput" class="filter" type="text" placeholder="Filter by position">
         <div id="players"></div>
@@ -46,16 +46,15 @@
 
     <div class="column">
         <h2>Draft Order</h2>
+        <label for="numRounds">Number of Draft Rounds:</label>
+        <input type="number" id="numRounds" min="1" value="3">
+        <button id="updateRounds">Update</button>
         <div id="draftOrder"></div>
     </div>
 
     <div class="column">
         <h2>Draft Results</h2>
         <div id="draftResults"></div>
-        <br>
-        <label for="numRounds">Number of Draft Rounds:</label>
-        <input type="number" id="numRounds" min="1" value="3">
-        <button id="updateRounds">Update Draft Rounds</button>
     </div>
 
     <script>
@@ -68,6 +67,7 @@
         let players = [];
         let teams = [];
         let currentDraftPick = 0; // Track the current draft pick index
+        let numRounds = 3; // Default number of draft rounds
 
         // Fetch players
         fetch(playersUrl)
@@ -195,9 +195,9 @@
 
         // Update number of draft rounds
         document.getElementById('updateRounds').addEventListener('click', () => {
-            const numRounds = document.getElementById('numRounds').value;
-            console.log(`Number of Draft Rounds: ${numRounds}`);
-            // Handle draft round updates logic if needed
+            const numRoundsInput = document.getElementById('numRounds').value;
+            numRounds = Math.max(1, Number(numRoundsInput)); // Ensure it is at least 1
+            displayDraftOrder(teams); // Re-display draft order with updated number of rounds
         });
     </script>
 </body>
