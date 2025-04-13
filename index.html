@@ -112,7 +112,19 @@
             });
         }
 
-      function displayDraftOrder(teams) {
+            function displayPlayers(players) {
+            const playersContainer = document.getElementById('players');
+            playersContainer.innerHTML = ''; // Clear existing players
+            players.forEach(player => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'prospect';
+                playerDiv.textContent = `${player.ranking} | ${player.name} | ${player.position}`; // Updated display format
+                playerDiv.onclick = () => assignPlayerToDraft(player);
+                playersContainer.appendChild(playerDiv);
+            });
+        }
+
+        function displayDraftOrder(teams) {
             const draftOrderContainer = document.getElementById('draftOrder');
             draftOrderContainer.innerHTML = ''; // Clear existing teams
             teams.forEach((team, index) => {
@@ -132,7 +144,6 @@
             });
         }
 
-        // Filter players by position
         function filterPlayersByPosition(position) {
             const filteredPlayers = players.filter(player => player.position.toLowerCase().includes(position.toLowerCase()));
             displayPlayers(filteredPlayers);
@@ -142,8 +153,7 @@
             filterPlayersByPosition(e.target.value);
         });
 
-        // Assign player to draft
-         function assignPlayerToDraft(player) {
+        function assignPlayerToDraft(player) {
             const team = teams[currentDraftPick]; // Get the current team
             const draftEntry = document.createElement('div');
             draftEntry.textContent = `${player.name} (Rank: ${player.ranking}) assigned to ${team.name}`;
@@ -154,14 +164,17 @@
             players = players.filter(p => p.name !== player.name);
             displayPlayers(players); // Update player display
 
-            // Move to the next draft pick
-            currentDraftPick++;
+            // Remove the drafted team from the draft order
+            teams.splice(currentDraftPick, 1); // Remove the current team
+            currentDraftPick = Math.max(0, currentDraftPick - 1); // Adjust the draft pick index if needed
+            displayDraftOrder(teams); // Update draft order display
+
+            // Move to the next draft pick, if available
             if (currentDraftPick >= teams.length) {
                 currentDraftPick = 0; // If the end of the list is reached, reset to the first team
             }
             highlightNextTeam(); // Highlight the next team
         }
-
   
         function saveTeamName(team, input, teamDiv) {
             team.name = input.value; // Update the team's name
