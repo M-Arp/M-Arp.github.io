@@ -114,10 +114,7 @@
         function displayDraftOrder(teams) {
             const draftOrderContainer = document.getElementById('draftOrder');
             draftOrderContainer.innerHTML = ''; // Clear existing teams
-             let numTeamsToDisplay = teams.length / numRounds;
-
-            for (let i = 0; i < Math.min(numRounds, teams.length); i++) {
-                const team = teams[i];
+            teams.forEach((team, index) => {
                 const teamDiv = document.createElement('div');
                 teamDiv.className = 'team';
                 teamDiv.innerHTML = `${team.draftOrder}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">`;
