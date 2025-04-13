@@ -47,8 +47,8 @@
     </div>
 
     <div class="column">
-        <h2>Draft Teams</h2>
-        <div id="teams"></div>
+        <h2>Draft Order</h2>
+        <div id="draftOrder"></div>
     </div>
 
     <div class="column">
@@ -69,6 +69,7 @@
 
         let players = [];
         let teams = [];
+        let currentDraftPick = 0; // Track the current draft pick index
 
         // Fetch players
         fetch(playersUrl)
@@ -95,7 +96,7 @@
                     logo: row.c[3]?.v,      // Team logo URL
                     draftOrder: row.c[1]?.v // Draft order
                 }));
-                displayTeams(teams);
+                displayDraftOrder(teams);
             })
             .catch(error => console.error('Error fetching team data:', error));
 
@@ -112,21 +113,23 @@
             });
         }
 
-        function displayTeams(teams) {
-            const teamsContainer = document.getElementById('teams');
-            teamsContainer.innerHTML = ''; // Clear existing teams
+      function displayDraftOrder(teams) {
+            const draftOrderContainer = document.getElementById('draftOrder');
+            draftOrderContainer.innerHTML = ''; // Clear existing teams
             teams.forEach((team, index) => {
                 const teamDiv = document.createElement('div');
                 teamDiv.className = 'team';
-                teamDiv.innerHTML = `${team.name} <img src="${team.logo}" alt="${team.name}" width="30">`;
+                teamDiv.innerHTML = `${team.draftOrder}: ${team.name} <img src="${team.logo}" alt="${team.name}" width="30">`;
+                draftOrderContainer.appendChild(teamDiv);
+            });
+            // Automatically highlight next team for picking
+            highlightNextTeam();
+        }
 
-                // Enable team name editing
-                const editButton = document.createElement('button');
-                editButton.textContent = "Edit Team Name";
-                editButton.onclick = () => editTeamName(team, teamDiv);
-                
-                teamDiv.appendChild(editButton);
-                teamsContainer.appendChild(teamDiv);
+        function highlightNextTeam() {
+            const teamDivs = document.querySelectorAll('.team');
+            teamDivs.forEach((div, index) => {
+                div.style.fontWeight = (index === currentDraftPick) ? 'bold' : 'normal'; // Bold the current draft pick
             });
         }
 
@@ -142,16 +145,21 @@
 
         // Assign player to draft
         function assignPlayerToDraft(player) {
-            const selectedTeam = prompt("Enter team name for this pick:");
-            if (selectedTeam) {
-                const draftEntry = document.createElement('div');
-                draftEntry.textContent = `${player.name} (Rank: ${player.ranking}) assigned to ${selectedTeam}`;
-                draftEntry.className = 'drafted';
-                document.getElementById('draftResults').appendChild(draftEntry);
+            const team = teams[currentDraftPick]; // Get the current team
+            const draftEntry = document.createElement('div');
+            draftEntry.textContent = `${player.name} (Rank: ${player.ranking}) assigned to ${team.name}`;
+            draftEntry.className = 'drafted';
+            document.getElementById('draftResults').appendChild(draftEntry);
+
+            // Move to the next draft pick
+            currentDraftPick++;
+            if (currentDraftPick >= teams.length) {
+                currentDraftPick = 0; // If the end of the list is reached, reset to the first team
             }
+            highlightNextTeam(); // Highlight the next team
         }
 
-        // Edit team name logic
+        // Handle team name editing logic
         function editTeamName(team, teamDiv) {
             const input = document.createElement('input');
             input.type = 'text';
@@ -171,7 +179,7 @@
 
         function saveTeamName(team, input, teamDiv) {
             team.name = input.value; // Update the team's name
-            displayTeams(teams); // Refresh team display with updated names
+            displayDraftOrder(teams); // Refresh team display with updated names
         }
 
         // Update number of draft rounds
