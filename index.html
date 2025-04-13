@@ -38,7 +38,6 @@
     </style>
 </head>
 <body>
-
     <div class="column">
         <h2>Player Pool</h2>
         <input id="filterInput" class="filter" type="text" placeholder="Filter by position">
@@ -60,11 +59,11 @@
     </div>
 
     <script>
-        const playersSheetId = 'YOUR_PLAYERS_SHEET_ID'; // Replace with your Players Google Sheet ID
-        const teamsSheetId = 'YOUR_TEAMS_SHEET_ID'; // Replace with your Teams Google Sheet ID
+        const playersSheetId = '1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY'; // Replace with your Players Google Sheet ID
+        const teamsSheetId = '1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0'; // Replace with your Teams Google Sheet ID
 
-        const playersUrl = `https://docs.google.com/spreadsheets/d/${playersSheetId}/gviz/tq?tqx=out:json`;
-        const teamsUrl = `https://docs.google.com/spreadsheets/d/${teamsSheetId}/gviz/tq?tqx=out:json`;
+        const playersUrl = `https://docs.google.com/spreadsheets/d/1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY/gviz/tq?tqx=out:json`;
+        const teamsUrl = `https://docs.google.com/spreadsheets/d/1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0/gviz/tq?tqx=out:json`;
 
         let players = [];
         let teams = [];
@@ -78,10 +77,10 @@
             .then(data => {
                 const jsonData = JSON.parse(data.substr(47).slice(0, -2));
                 players = jsonData.table.rows.map(row => ({
-                    name: row.c[0]?.v,      // Player name
-                    position: row.c[1]?.v,  // Player position
-                    school: row.c[2]?.v,    // Player school
-                    ranking: row.c[3]?.v     // Player ranking
+                    name: row.c[5]?.v,      // Player name
+                    position: row.c[6]?.v,  // Player position
+                    school: row.c[8]?.v,    // Player school
+                    ranking: row.c[0]?.v     // Player ranking
                 }));
                 displayPlayers(players);
             })
@@ -93,15 +92,16 @@
             .then(data => {
                 const jsonData = JSON.parse(data.substr(47).slice(0, -2));
                 teams = jsonData.table.rows.map(row => ({
-                    name: row.c[0]?.v,      // Team name
-                    logo: row.c[1]?.v,      // Team logo URL
-                    draftOrder: row.c[2]?.v // Draft order
+                    name: row.c[2]?.v,      // Team name
+                    logo: row.c[3]?.v,      // Team logo URL
+                    draftOrder: row.c[1]?.v // Draft order
                 }));
                 displayDraftOrder(teams);
             })
             .catch(error => console.error('Error fetching team data:', error));
 
-        function displayPlayers(players) {
+        // Display players with Rank | Name | Position format
+ function displayPlayers(players) {
             const playersContainer = document.getElementById('players');
             playersContainer.innerHTML = ''; // Clear existing players
             const start = currentPlayerOffset * 25; // Calculate start index for current offset
