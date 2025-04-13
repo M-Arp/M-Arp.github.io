@@ -21,7 +21,7 @@
         h2 {
             text-align: center;
         }
-        .prospect, .team {
+        .prospect, .team, .drafted {
             padding: 10px;
             margin: 5px 0;
             background-color: #e0e0e0;
@@ -29,127 +29,154 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
-        .prospect:hover, .team:hover {
-            background-color: #d1f1d1;
-        }
         .drafted {
             background-color: #f0f0f0;
             text-decoration: line-through;
         }
-        .editing {
-            background-color: #ffc107; /* Highlight color when editing */
+        .filter {
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
 
     <div class="column">
-        <h2>NFL Prospects</h2>
-        <div id="prospects"></div>
+        <h2>Player Pool</h2>
+        <input id="filterInput" class="filter" type="text" placeholder="Filter by position">
+        <div id="players"></div>
     </div>
 
     <div class="column">
-        <h2>Teams</h2>
+        <h2>Draft Teams</h2>
         <div id="teams"></div>
     </div>
 
     <div class="column">
         <h2>Draft Results</h2>
         <div id="draftResults"></div>
+        <br>
+        <label for="numRounds">Number of Draft Rounds:</label>
+        <input type="number" id="numRounds" min="1" value="3">
+        <button id="updateRounds">Update Draft Rounds</button>
     </div>
 
     <script>
-        const sheetId = 'YOUR_SHEET_ID'; // Replace with your Google Sheet ID
-        const prospectsUrl = `https://docs.google.com/spreadsheets/d/1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY/gviz/tq?tqx=out:json`;
-        const teamsUrl = `https://docs.google.com/spreadsheets/d/1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY/gviz/tq?tqx=out:json`;
+        const playersSheetId = 'YOUR_PLAYERS_SHEET_ID'; // Replace with your Players Google Sheet ID
+        const teamsSheetId = 'YOUR_TEAMS_SHEET_ID'; // Replace with your Teams Google Sheet ID
 
-        // Fetch prospects
-        fetch(prospectsUrl)
+        const playersUrl = `https://docs.google.com/spreadsheets/d/${playersSheetId}/gviz/tq?tqx=out:json`;
+        const teamsUrl = `https://docs.google.com/spreadsheets/d/${teamsSheetId}/gviz/tq?tqx=out:json`;
+
+        let players = [];
+        let teams = [];
+
+        // Fetch players
+        fetch(playersUrl)
             .then(response => response.text())
             .then(data => {
                 const jsonData = JSON.parse(data.substr(47).slice(0, -2));
-                const prospects = jsonData.table.rows.map(row => row.c[5].v);
-
-                const prospectsContainer = document.getElementById('prospects');
-                prospects.forEach(prospect => {
-                    const div = document.createElement('div');
-                    div.className = 'prospect';
-                    div.textContent = prospect;
-                    prospectsContainer.appendChild(div);
-                });
-                enableProspectClick();
+                players = jsonData.table.rows.map(row => ({
+                    name: row.c[0]?.v,
+                    position: row.c[1]?.v,
+                    school: row.c[2]?.v,
+                    ranking: row.c[3]?.v
+                }));
+                displayPlayers(players);
             })
-            .catch(error => console.error('Error fetching prospect data:', error));
+            .catch(error => console.error('Error fetching player data:', error));
 
         // Fetch teams
         fetch(teamsUrl)
             .then(response => response.text())
             .then(data => {
                 const jsonData = JSON.parse(data.substr(47).slice(0, -2));
-                const teams = jsonData.table.rows.map(row => row.c[0].v);
-
-                const teamsContainer = document.getElementById('teams');
-                teams.forEach((team, index) => {
-                    const div = document.createElement('div');
-                    div.className = 'team';
-                    div.textContent = team;
-                    
-                    div.addEventListener('click', function() {
-                        // Enable editing team name
-                        const input = document.createElement('input');
-                        input.type = 'text';
-                        input.value = team;
-                        div.textContent = ''; // Clear the div
-                        div.appendChild(input);
-                        input.focus();
-
-                        // Save updated team name on blur or enter
-                        input.addEventListener('blur', saveTeamName);
-                        input.addEventListener('keypress', function(event) {
-                            if (event.key === 'Enter') {
-                                saveTeamName();
-                            }
-                        });
-
-                        function saveTeamName() {
-                            const newTeamName = input.value;
-                            if (newTeamName) {
-                                div.textContent = newTeamName; // Set the new team name
-                                div.classList.remove('editing'); // Remove editing class
-                            } else {
-                                div.textContent = team; // Reset to original if empty
-                            }
-                        }
-                    });
-
-                    teamsContainer.appendChild(div);
-                });
+                teams = jsonData.table.rows.map(row => ({
+                    name: row.c[0]?.v,
+                    logo: row.c[1]?.v,
+                    draftOrder: row.c[2]?.v
+                }));
+                displayTeams(teams);
             })
             .catch(error => console.error('Error fetching team data:', error));
 
-        function enableProspectClick() {
-            const prospects = document.querySelectorAll('.prospect');
-            const teams = document.querySelectorAll('.team');
-            const draftResultsContainer = document.getElementById('draftResults');
-
-            prospects.forEach(prospect => {
-                prospect.addEventListener('click', function() {
-                    const selectedProspect = this.textContent;
-                    teams.forEach(team => {
-                        team.onclick = function() {
-                            if (!this.classList.contains('drafted')) {
-                                const draftEntry = document.createElement('div');
-                                draftEntry.textContent = `${selectedProspect} → ${this.textContent}`;
-                                draftEntry.className = 'drafted'; 
-                                draftResultsContainer.appendChild(draftEntry);
-                                this.classList.add('drafted'); 
-                                prospect.classList.add('drafted'); // Optionally mark prospect as drafted
-                            }
-                        };
-                    });
-                });
+        function displayPlayers(players) {
+            const playersContainer = document.getElementById('players');
+            playersContainer.innerHTML = ''; // Clear existing players
+            players.forEach(player => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'prospect';
+                playerDiv.textContent = `${player.name} (${player.position}) - ${player.school} (Rank: ${player.ranking})`;
+                playerDiv.onclick = () => assignPlayerToDraft(player);
+                playersContainer.appendChild(playerDiv);
             });
         }
+
+        function displayTeams(teams) {
+            const teamsContainer = document.getElementById('teams');
+            teamsContainer.innerHTML = ''; // Clear existing teams
+            teams.forEach((team, index) => {
+                const teamDiv = document.createElement('div');
+                teamDiv.className = 'team';
+                teamDiv.innerHTML = `${team.name} <img src="${team.logo}" alt="${team.name}" width="30">`;
+
+                // Enable team name editing
+                const editButton = document.createElement('button');
+                editButton.textContent = "Edit Team Name";
+                editButton.onclick = () => editTeamName(team, teamDiv);
+                
+                teamDiv.appendChild(editButton);
+                teamsContainer.appendChild(teamDiv);
+            });
+        }
+
+        function filterPlayersByPosition(position) {
+            const filteredPlayers = players.filter(player => player.position.toLowerCase().includes(position.toLowerCase()));
+            displayPlayers(filteredPlayers);
+        }
+
+        document.getElementById('filterInput').addEventListener('input', (e) => {
+            filterPlayersByPosition(e.target.value);
+        });
+
+        function assignPlayerToDraft(player) {
+            const selectedTeam = prompt("Enter team name for this pick:");
+            if (selectedTeam) {
+                const draftEntry = document.createElement('div');
+                draftEntry.textContent = `${player.name} assigned to ${selectedTeam}`;
+                draftEntry.className = 'drafted';
+                document.getElementById('draftResults').appendChild(draftEntry);
+            }
+        }
+
+        function editTeamName(team, teamDiv) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = team.name;
+
+            // On focus out or enter, save the new team name
+            input.addEventListener('blur', () => saveTeamName(team, input, teamDiv));
+            input.addEventListener('keypress', function (event) {
+                if (event.key === 'Enter') {
+                    saveTeamName(team, input, teamDiv);
+                }
+            });
+
+            teamDiv.textContent = ''; // Clear existing content
+            teamDiv.appendChild(input);
+            input.focus();
+        }
+
+        function saveTeamName(team, input, teamDiv) {
+            team.name = input.value; // Update the team's name
+            displayTeams(teams); // Refresh team display with updated names
+        }
+
+        // Update number of draft rounds
+        document.getElementById('updateRounds').addEventListener('click', () => {
+            const numRounds = document.getElementById('numRounds').value;
+            console.log(`Number of Draft Rounds: ${numRounds}`);
+            // Here you can handle draft round updates logic if needed
+        });
     </script>
 </body>
 </html>
