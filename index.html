@@ -61,11 +61,11 @@
     </div>
 
     <script>
-        const playersSheetId = 'YOUR_PLAYERS_SHEET_ID'; // Replace with your Players Google Sheet ID
-        const teamsSheetId = 'YOUR_TEAMS_SHEET_ID'; // Replace with your Teams Google Sheet ID
+        const playersSheetId = '1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY'; // Replace with your Players Google Sheet ID
+        const teamsSheetId = '1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0'; // Replace with your Teams Google Sheet ID
 
-        const playersUrl = `https://docs.google.com/spreadsheets/d/${playersSheetId}/gviz/tq?tqx=out:json`;
-        const teamsUrl = `https://docs.google.com/spreadsheets/d/${teamsSheetId}/gviz/tq?tqx=out:json`;
+        const playersUrl = `https://docs.google.com/spreadsheets/d/1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY/gviz/tq?tqx=out:json`;
+        const teamsUrl = `https://docs.google.com/spreadsheets/d/1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0}/gviz/tq?tqx=out:json`;
 
         let players = [];
         let teams = [];
@@ -76,10 +76,10 @@
             .then(data => {
                 const jsonData = JSON.parse(data.substr(47).slice(0, -2));
                 players = jsonData.table.rows.map(row => ({
-                    name: row.c[0]?.v,
-                    position: row.c[1]?.v,
-                    school: row.c[2]?.v,
-                    ranking: row.c[3]?.v
+                    name: row.c[5]?.v,      // Player name
+                    position: row.c[6]?.v,  // Player position
+                    school: row.c[8]?.v,    // Player school
+                    ranking: row.c[0]?.v     // Player ranking
                 }));
                 displayPlayers(players);
             })
@@ -91,21 +91,22 @@
             .then(data => {
                 const jsonData = JSON.parse(data.substr(47).slice(0, -2));
                 teams = jsonData.table.rows.map(row => ({
-                    name: row.c[0]?.v,
-                    logo: row.c[1]?.v,
-                    draftOrder: row.c[2]?.v
+                    name: row.c[1]?.v,      // Team name
+                    logo: row.c[1]?.v,      // Team logo URL
+                    draftOrder: row.c[0]?.v // Draft order
                 }));
                 displayTeams(teams);
             })
             .catch(error => console.error('Error fetching team data:', error));
 
+        // Display players with Rank | Name | Position format
         function displayPlayers(players) {
             const playersContainer = document.getElementById('players');
             playersContainer.innerHTML = ''; // Clear existing players
             players.forEach(player => {
                 const playerDiv = document.createElement('div');
                 playerDiv.className = 'prospect';
-                playerDiv.textContent = `${player.name} (${player.position}) - ${player.school} (Rank: ${player.ranking})`;
+                playerDiv.textContent = `${player.ranking} | ${player.name} | ${player.position}`; // Updated display format
                 playerDiv.onclick = () => assignPlayerToDraft(player);
                 playersContainer.appendChild(playerDiv);
             });
@@ -129,6 +130,7 @@
             });
         }
 
+        // Filter players by position
         function filterPlayersByPosition(position) {
             const filteredPlayers = players.filter(player => player.position.toLowerCase().includes(position.toLowerCase()));
             displayPlayers(filteredPlayers);
@@ -138,22 +140,23 @@
             filterPlayersByPosition(e.target.value);
         });
 
+        // Assign player to draft
         function assignPlayerToDraft(player) {
             const selectedTeam = prompt("Enter team name for this pick:");
             if (selectedTeam) {
                 const draftEntry = document.createElement('div');
-                draftEntry.textContent = `${player.name} assigned to ${selectedTeam}`;
+                draftEntry.textContent = `${player.name} (Rank: ${player.ranking}) assigned to ${selectedTeam}`;
                 draftEntry.className = 'drafted';
                 document.getElementById('draftResults').appendChild(draftEntry);
             }
         }
 
+        // Edit team name logic
         function editTeamName(team, teamDiv) {
             const input = document.createElement('input');
             input.type = 'text';
             input.value = team.name;
 
-            // On focus out or enter, save the new team name
             input.addEventListener('blur', () => saveTeamName(team, input, teamDiv));
             input.addEventListener('keypress', function (event) {
                 if (event.key === 'Enter') {
@@ -175,7 +178,7 @@
         document.getElementById('updateRounds').addEventListener('click', () => {
             const numRounds = document.getElementById('numRounds').value;
             console.log(`Number of Draft Rounds: ${numRounds}`);
-            // Here you can handle draft round updates logic if needed
+            // Handle draft round updates logic if needed
         });
     </script>
 </body>
