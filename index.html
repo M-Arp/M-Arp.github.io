@@ -3,20 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NFL Draft Picks</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>NFL Mock Draft Builder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: space-around;
+            margin: 20px;
+        }
+        .column {
+            width: 45%;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+        }
+        h2 {
+            text-align: center;
+        }
+        .prospect, .team {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #e0e0e0;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .prospect:hover, .team:hover {
+            background-color: #d1f1d1;
+        }
+        .selected {
+            background-color: #c1e1c1; /* Change color when added */
+        }
+        .drafted {
+            background-color: #f0f0f0;
+            text-decoration: line-through; /* Strike through drafted names */
+        }
+    </style>
 </head>
 <body>
 
-<h2>NFL Draft Picks</h2>
-<ul id="draft-picks">
-    <li draggable="true" id="pick-1">1. Trevor Lawrence - QB</li>
-    <li draggable="true" id="pick-2">2. Zach Wilson - QB</li>
-    <li draggable="true" id="pick-3">3. Trey Lance - QB</li>
-    <li draggable="true" id="pick-4">4. Kyle Pitts - TE</li>
-    <li draggable="true" id="pick-5">5. Ja'Marr Chase - WR</li>
-</ul>
+    <div class="column">
+        <h2>NFL Prospects</h2>
+        <div id="prospects">
+            <div class="prospect">Prospect Name 1</div>
+            <div class="prospect">Prospect Name 2</div>
+            <div class="prospect">Prospect Name 3</div>
+            <div class="prospect">Prospect Name 4</div>
+            <div class="prospect">Prospect Name 5</div>
+            <div class="prospect">Prospect Name 6</div>
+            <div class="prospect">Prospect Name 7</div>
+        </div>
+    </div>
 
-<script src="script.js"></script>
+    <div class="column">
+        <h2>Teams</h2>
+        <div class="team" data-team-name="Team A">Team A</div>
+        <div class="team" data-team-name="Team B">Team B</div>
+        <div class="team" data-team-name="Team C">Team C</div>
+        <div class="team" data-team-name="Team D">Team D</div>
+        <div class="team" data-team-name="Team E">Team E</div>
+    </div>
+
+    <div class="column">
+        <h2>Draft Results</h2>
+        <div id="draftResults">
+            <!-- Draft results will be appended here -->
+        </div>
+    </div>
+
+    <script>
+        // Get all prospects and teams
+        const prospects = document.querySelectorAll('.prospect');
+        const teams = document.querySelectorAll('.team');
+        const draftResults = document.getElementById('draftResults');
+
+        // Loop through each prospect to add click event
+        prospects.forEach(prospect => {
+            prospect.addEventListener('click', function() {
+                // Highlight selected prospect
+                const selectedProspectName = this.textContent;
+
+                // Mark name as selected
+                this.classList.toggle('selected');
+
+                // Add click event to each team
+                teams.forEach(team => {
+                    team.onclick = function() {
+                        // Check if this team has already drafted a player
+                        const existingDraft = [...draftResults.children].some(item => item.dataset.prospectName === selectedProspectName);
+                        
+                        if (!existingDraft) {
+                            // Create a new draft entry
+                            const draftEntry = document.createElement('div');
+                            draftEntry.className = 'drafted'; // Style as drafted
+                            draftEntry.textContent = `${selectedProspectName} → ${this.textContent}`; // Text indicates who was drafted by which team
+                            draftEntry.dataset.prospectName = selectedProspectName; // Store the prospect name
+
+                            // Append the draft entry to the draft results
+                            draftResults.appendChild(draftEntry);
+                            
+                            // Remove selected class from the prospect and show as drafted
+                            this.classList.add('drafted'); // Optionally style the team as drafted
+                            prospect.classList.remove('selected');
+                        }
+                    };
+                });
+            });
+        });
+    </script>
+
 </body>
 </html>
