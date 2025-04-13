@@ -68,9 +68,10 @@
         let players = [];
         let teams = [];
         let currentDraftPick = 0; // Track the current draft pick index
-        let numRounds = 32; // Default number of draft rounds
-        let currentPlayerOffset = 0; // Offset for current player pool
-
+        let numRounds = 3; // Default number of draft rounds
+        let currentPlayerOffset = 0; // Offset for currently displayed players
+        const playersPerPage = 25; // Number of players to show at once
+        
         // Fetch players
         fetch(playersUrl)
             .then(response => response.text())
