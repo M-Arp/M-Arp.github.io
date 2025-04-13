@@ -117,15 +117,16 @@
             teams.forEach((team, index) => {
                 const teamDiv = document.createElement('div');
                 teamDiv.className = 'team';
-                teamDiv.innerHTML = `${team.draftOrder}: ${team.name} <img src="${team.logo}" alt="${team.name}" width="30">`;
-                draftOrderContainer.appendChild(teamDiv);
-
-             const editButton = document.createElement('button');
-                editButton.textContent = "Edit Team Name";
+                teamDiv.innerHTML = `${team.draftOrder}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">`;
+                
+                // Add Edit button for each team
+                const editButton = document.createElement('button');
+                editButton.innerText = 'Edit';
+                editButton.className = 'edit-button';
                 editButton.onclick = () => editTeamName(team, teamDiv);
                 
                 teamDiv.appendChild(editButton);
-                teamsContainer.appendChild(teamDiv);
+                draftOrderContainer.appendChild(teamDiv);
             });
             // Automatically highlight next team for picking
             highlightNextTeam();
@@ -169,7 +170,24 @@
             }
             highlightNextTeam(); // Highlight the next team
         }
-  
+
+        function editTeamName(team, teamDiv) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = team.name;
+
+            input.addEventListener('blur', () => saveTeamName(team, input, teamDiv));
+            input.addEventListener('keypress', function (event) {
+                if (event.key === 'Enter') {
+                    saveTeamName(team, input, teamDiv);
+                }
+            });
+
+            teamDiv.querySelector('.team-name').innerHTML = ''; // Clear existing content
+            teamDiv.querySelector('.team-name').appendChild(input);
+            input.focus();
+        }
+
         function saveTeamName(team, input, teamDiv) {
             team.name = input.value; // Update the team's name
             displayDraftOrder(teams); // Refresh team display with updated names
