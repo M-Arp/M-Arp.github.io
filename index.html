@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NFL Mock Draft Builder</title>
-    <style>
+ <style>
         body {
             font-family: Arial, sans-serif;
             display: flex;
@@ -31,24 +31,60 @@
         }
         .drafted {
             background-color: #f0f0f0;
+            text-decoration: line-through;
         }
-        .filter {
+        .filter-buttons {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 10px;
+        }
+        .filter-button {
+            padding: 5px 10px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #e6e6e6;
+            transition: background-color 0.3s;
+        }
+        .filter-button:hover {
+            background-color: #d4d4d4;
+        }
+        .edit-button {
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        .show-more-button {
+            margin-top: 10px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <div class="column">
         <h2>Player Pool</h2>
-        <input id="filterInput" class="filter" type="text" placeholder="Filter by position">
+        <div class="filter-buttons">
+            <button class="filter-button" onclick="filterByPosition('QB')">QB</button>
+            <button class="filter-button" onclick="filterByPosition('RB')">RB</button>
+            <button class="filter-button" onclick="filterByPosition('TE')">TE</button>
+            <button class="filter-button" onclick="filterByPosition('OT')">OT</button>
+            <button class="filter-button" onclick="filterByPosition('IOL')">IOL</button>
+            <button class="filter-button" onclick="filterByPosition('WR')">WR</button>
+            <button class="filter-button" onclick="filterByPosition('CB')">CB</button>
+            <button class="filter-button" onclick="filterByPosition('DT')">DT</button>
+            <button class="filter-button" onclick="filterByPosition('EDGE')">EDGE</button>
+            <button class="filter-button" onclick="filterByPosition('LB')">LB</button>
+            <button class="filter-button" onclick="filterByPosition('S')">S</button>
+            <button class="filter-button" onclick="filterByPosition('ST')">ST</button>
+            <button class="filter-button" onclick="resetFilter()">All</button> <!-- Reset button -->
+        </div>
         <div id="players"></div>
-        <button id="showMorePlayers" class="show-more-button">Show More Players</button>
+        <button id="showMorePlayers" class="show-more-button" style="display: none;">Show More Players</button>
     </div>
 
     <div class="column">
         <h2>Draft Order</h2>
-        <label for="numRounds">Number of Draft Picks:</label>
-        <input type="number" id="numRounds" min="32" max="257" value="32">
+        <label for="numRounds">Number of Draft Rounds:</label>
+        <input type="number" id="numRounds" min="1" max="7" value="3">
         <button id="updateRounds">Update</button>
         <div id="draftOrder"></div>
     </div>
@@ -68,9 +104,10 @@
         let players = [];
         let teams = [];
         let currentDraftPick = 0; // Track the current draft pick index
-        let numRounds = 32; // Default number of draft rounds
+        let numRounds = 3; // Default number of draft rounds
         let currentPlayerOffset = 0; // Offset for currently displayed players
         const playersPerPage = 25; // Number of players to show at once
+        let filteredPlayers = []; // To hold filtered player data
         
         // Fetch players
         fetch(playersUrl)
@@ -102,8 +139,9 @@
             .catch(error => console.error('Error fetching team data:', error));
 
         // Display players with Rank | Name | Position format
-        function displayPlayers(players) {
+           function displayPlayers(players) {
             const playersContainer = document.getElementById('players');
+            playersContainer.innerHTML = ''; // Clear existing players
 
             // Only add players that fall within the currentPlayerOffset range
             const start = currentPlayerOffset * playersPerPage;
@@ -130,7 +168,6 @@
         function displayDraftOrder(teams) {
             const draftOrderContainer = document.getElementById('draftOrder');
             draftOrderContainer.innerHTML = ''; // Clear existing teams
-            let roundCounter = 0;
 
             // Show only the specified number of rounds
             for (let i = 0; i < Math.min(numRounds, teams.length); i++) {
@@ -159,73 +196,41 @@
             });
         }
 
-        function filterPlayersByPosition(position) {
-            const filteredPlayers = players.filter(player => player.position.toLowerCase().includes(position.toLowerCase()));
+        function filterByPosition(position) {
+            currentPlayerOffset = 0; // Reset offset for new filter
+            filteredPlayers = players.filter(player => player.position === position);
             displayPlayers(filteredPlayers);
         }
 
-        document.getElementById('filterInput').addEventListener('input', (e) => {
-            filterPlayersByPosition(e.target.value);
-        });
-
-        function assignPlayerToDraft(player) {
-            const team = teams[currentDraftPick]; // Get the current team
-            const draftEntry = document.createElement('div');
-            draftEntry.textContent = `${player.name} (Rank: ${player.ranking}) assigned to ${team.name}`;
-            draftEntry.className = 'drafted';
-            document.getElementById('draftResults').appendChild(draftEntry);
-
-            // Remove the drafted player from the pool
-            players = players.filter(p => p.name !== player.name);
-            displayPlayers(players); // Update player display
-
-            // Remove the drafted team from the draft order
-            teams.splice(currentDraftPick, 1); // Remove the current team
-            currentDraftPick = Math.max(0, currentDraftPick - 1); // Adjust the draft pick index if needed
-            displayDraftOrder(teams); // Update draft order display
-
-            // Move to the next draft pick, if available
-            if (currentDraftPick >= teams.length) {
-                currentDraftPick = 0; // If the end of the list is reached, reset to the first team
-            }
-            highlightNextTeam(); // Highlight the next team
+        function resetFilter() {
+            currentPlayerOffset = 0; // Reset offset
+            filteredPlayers = players; // Reset filtered players to original
+            displayPlayers(filteredPlayers); // Display all players
         }
 
-        function editTeamName(team, teamDiv) {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = team.name;
-
-            input.addEventListener('blur', () => saveTeamName(team, input, teamDiv));
-            input.addEventListener('keypress', function (event) {
-                if (event.key === 'Enter') {
-                    saveTeamName(team, input, teamDiv);
-                }
+        // Button listeners for filtering
+        function addFilterListeners() {
+            const positions = ['QB', 'RB', 'TE', 'OT', 'IOL', 'WR', 'CB', 'DT', 'EDGE', 'LB', 'S', 'ST'];
+            positions.forEach(pos => {
+                const button = document.querySelector(`.filter-button[onclick="filterByPosition('${pos}')"]`);
+                button.addEventListener('click', () => filterByPosition(pos));
             });
-
-            teamDiv.querySelector('.team-name').innerHTML = ''; // Clear existing content
-            teamDiv.querySelector('.team-name').appendChild(input);
-            input.focus();
         }
 
-        function saveTeamName(team, input, teamDiv) {
-            team.name = input.value; // Update the team's name
-            displayDraftOrder(teams); // Refresh team display with updated names
-        }
-
-        function showMorePlayers() {
+        document.getElementById('showMorePlayers').addEventListener('click', () => {
             currentPlayerOffset++; // Increment offset to load next set of players
-            displayPlayers(players); // Re-display player pool with new offset
-        }
-
-        document.getElementById('showMorePlayers').addEventListener('click', showMorePlayers);
+            displayPlayers(filteredPlayers); // Re-display player pool with new offset
+        });
 
         // Update number of draft rounds
         document.getElementById('updateRounds').addEventListener('click', () => {
             const numRoundsInput = document.getElementById('numRounds').value;
-            numRounds = Math.max(32, Math.min(247, Number(numRoundsInput))); // Ensure it is between 1 and 7
+            numRounds = Math.max(1, Math.min(7, Number(numRoundsInput))); // Ensure it is between 1 and 7
             displayDraftOrder(teams); // Re-display draft order with updated number of rounds
         });
+
+        // Call the function to add filter listeners once the DOM is ready
+        addFilterListeners();
     </script>
 </body>
 </html>
