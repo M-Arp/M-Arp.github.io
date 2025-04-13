@@ -38,10 +38,12 @@
     </style>
 </head>
 <body>
-  <div class="column">
+
+    <div class="column">
         <h2>Player Pool</h2>
         <input id="filterInput" class="filter" type="text" placeholder="Filter by position">
         <div id="players"></div>
+        <button id="showMorePlayers" class="show-more-button">Show More Players</button>
     </div>
 
     <div class="column">
@@ -58,16 +60,17 @@
     </div>
 
     <script>
-        const playersSheetId = '1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY'; // Replace with your Players Google Sheet ID
-        const teamsSheetId = '1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0'; // Replace with your Teams Google Sheet ID
+        const playersSheetId = 'YOUR_PLAYERS_SHEET_ID'; // Replace with your Players Google Sheet ID
+        const teamsSheetId = 'YOUR_TEAMS_SHEET_ID'; // Replace with your Teams Google Sheet ID
 
-        const playersUrl = `https://docs.google.com/spreadsheets/d/1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY/gviz/tq?tqx=out:json`;
-        const teamsUrl = `https://docs.google.com/spreadsheets/d/1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0/gviz/tq?tqx=out:json`;
+        const playersUrl = `https://docs.google.com/spreadsheets/d/${playersSheetId}/gviz/tq?tqx=out:json`;
+        const teamsUrl = `https://docs.google.com/spreadsheets/d/${teamsSheetId}/gviz/tq?tqx=out:json`;
 
         let players = [];
         let teams = [];
         let currentDraftPick = 0; // Track the current draft pick index
         let numRounds = 3; // Default number of draft rounds
+        let currentPlayerOffset = 0; // Offset for current player pool
 
         // Fetch players
         fetch(playersUrl)
@@ -75,10 +78,10 @@
             .then(data => {
                 const jsonData = JSON.parse(data.substr(47).slice(0, -2));
                 players = jsonData.table.rows.map(row => ({
-                    name: row.c[5]?.v,      // Player name
-                    position: row.c[6]?.v,  // Player position
-                    school: row.c[8]?.v,    // Player school
-                    ranking: row.c[0]?.v     // Player ranking
+                    name: row.c[0]?.v,      // Player name
+                    position: row.c[1]?.v,  // Player position
+                    school: row.c[2]?.v,    // Player school
+                    ranking: row.c[3]?.v     // Player ranking
                 }));
                 displayPlayers(players);
             })
@@ -90,31 +93,45 @@
             .then(data => {
                 const jsonData = JSON.parse(data.substr(47).slice(0, -2));
                 teams = jsonData.table.rows.map(row => ({
-                    name: row.c[2]?.v,      // Team name
-                    logo: row.c[3]?.v,      // Team logo URL
-                    draftOrder: row.c[1]?.v // Draft order
+                    name: row.c[0]?.v,      // Team name
+                    logo: row.c[1]?.v,      // Team logo URL
+                    draftOrder: row.c[2]?.v // Draft order
                 }));
                 displayDraftOrder(teams);
             })
             .catch(error => console.error('Error fetching team data:', error));
 
-        // Display players with Rank | Name | Position format
         function displayPlayers(players) {
             const playersContainer = document.getElementById('players');
             playersContainer.innerHTML = ''; // Clear existing players
-            players.forEach(player => {
+            const start = currentPlayerOffset * 25; // Calculate start index for current offset
+            const end = Math.min(start + 25, players.length); // Calculate end index
+
+            for (let i = start; i < end; i++) {
+                const player = players[i];
                 const playerDiv = document.createElement('div');
                 playerDiv.className = 'prospect';
-                playerDiv.textContent = `${player.ranking} | ${player.name} | ${player.position}`; // Updated display format
+                playerDiv.textContent = `${player.ranking} | ${player.name} | ${player.position}`;
                 playerDiv.onclick = () => assignPlayerToDraft(player);
                 playersContainer.appendChild(playerDiv);
-            });
+            }
+
+            // Show "Show More Players" button only if there are more than 25 players
+            if (end < players.length) {
+                document.getElementById('showMorePlayers').style.display = 'block';
+            } else {
+                document.getElementById('showMorePlayers').style.display = 'none';
+            }
         }
 
         function displayDraftOrder(teams) {
             const draftOrderContainer = document.getElementById('draftOrder');
             draftOrderContainer.innerHTML = ''; // Clear existing teams
-            teams.forEach((team, index) => {
+            let roundCounter = 0;
+
+            // Show only the specified number of rounds
+            for (let i = 0; i < Math.min(numRounds, teams.length); i++) {
+                const team = teams[i];
                 const teamDiv = document.createElement('div');
                 teamDiv.className = 'team';
                 teamDiv.innerHTML = `${team.draftOrder}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">`;
@@ -127,7 +144,7 @@
                 
                 teamDiv.appendChild(editButton);
                 draftOrderContainer.appendChild(teamDiv);
-            });
+            }
             // Automatically highlight next team for picking
             highlightNextTeam();
         }
@@ -192,6 +209,13 @@
             team.name = input.value; // Update the team's name
             displayDraftOrder(teams); // Refresh team display with updated names
         }
+
+        function showMorePlayers() {
+            currentPlayerOffset++; // Increment offset to load next set of players
+            displayPlayers(players); // Re-display player pool with new offset
+        }
+
+        document.getElementById('showMorePlayers').addEventListener('click', showMorePlayers);
 
         // Update number of draft rounds
         document.getElementById('updateRounds').addEventListener('click', () => {
