@@ -31,7 +31,6 @@
         }
         .drafted {
             background-color: #f0f0f0;
-            text-decoration: line-through;
         }
         .filter {
             margin-bottom: 10px;
@@ -112,18 +111,6 @@
             });
         }
 
-            function displayPlayers(players) {
-            const playersContainer = document.getElementById('players');
-            playersContainer.innerHTML = ''; // Clear existing players
-            players.forEach(player => {
-                const playerDiv = document.createElement('div');
-                playerDiv.className = 'prospect';
-                playerDiv.textContent = `${player.ranking} | ${player.name} | ${player.position}`; // Updated display format
-                playerDiv.onclick = () => assignPlayerToDraft(player);
-                playersContainer.appendChild(playerDiv);
-            });
-        }
-
         function displayDraftOrder(teams) {
             const draftOrderContainer = document.getElementById('draftOrder');
             draftOrderContainer.innerHTML = ''; // Clear existing teams
@@ -132,6 +119,13 @@
                 teamDiv.className = 'team';
                 teamDiv.innerHTML = `${team.draftOrder}: ${team.name} <img src="${team.logo}" alt="${team.name}" width="30">`;
                 draftOrderContainer.appendChild(teamDiv);
+
+             const editButton = document.createElement('button');
+                editButton.textContent = "Edit Team Name";
+                editButton.onclick = () => editTeamName(team, teamDiv);
+                
+                teamDiv.appendChild(editButton);
+                teamsContainer.appendChild(teamDiv);
             });
             // Automatically highlight next team for picking
             highlightNextTeam();
