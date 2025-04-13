@@ -12,7 +12,7 @@
             margin: 20px;
         }
         .column {
-            width: 45%;
+            width: 30%;
             padding: 20px;
             border: 1px solid #ccc;
             border-radius: 6px;
@@ -32,99 +32,124 @@
         .prospect:hover, .team:hover {
             background-color: #d1f1d1;
         }
-        .selected {
-            background-color: #c1e1c1; /* Change color when added */
-        }
         .drafted {
             background-color: #f0f0f0;
-            text-decoration: line-through; /* Strike through drafted names */
+            text-decoration: line-through;
+        }
+        .editing {
+            background-color: #ffc107; /* Highlight color when editing */
         }
     </style>
 </head>
 <body>
-    <h1>NFL Prospects</h1>
-    <div id="prospects">
 
-    <script>
-        const sheetId = '1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY'; // Replace with your Google Sheet ID
-        const url = `https://docs.google.com/spreadsheets/d/1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY/gviz/tq?tqx=out:json`;
-
-        fetch(url)
-            .then(response => response.text())
-            .then(data => {
-                // Remove the header part to extract JSON data
-                const jsonData = JSON.parse(data.substr(47).slice(0, -2));
-                const prospects = jsonData.table.rows.map(row => row.c[5].v); // Get names from the first column
-                const prospectsContainer = document.getElementById('prospects');
-
-                prospects.forEach(prospect => {
-                    const div = document.createElement('div');
-                    div.textContent = prospect; // Display names
-                    prospectsContainer.appendChild(div);
-                });
-            })
-            .catch(error => {
-                console.error('Error fetching data from Google Sheets:', error);
-            });
-    </script>
+    <div class="column">
+        <h2>NFL Prospects</h2>
+        <div id="prospects"></div>
     </div>
 
     <div class="column">
         <h2>Teams</h2>
-        <div class="team" data-team-name="Team A">Team A</div>
-        <div class="team" data-team-name="Team B">Team B</div>
-        <div class="team" data-team-name="Team C">Team C</div>
-        <div class="team" data-team-name="Team D">Team D</div>
-        <div class="team" data-team-name="Team E">Team E</div>
+        <div id="teams"></div>
     </div>
 
     <div class="column">
         <h2>Draft Results</h2>
-        <div id="draftResults">
-            <!-- Draft results will be appended here -->
-        </div>
+        <div id="draftResults"></div>
     </div>
 
     <script>
-        // Get all prospects and teams
-        const prospects = document.querySelectorAll('.prospect');
-        const teams = document.querySelectorAll('.team');
-        const draftResults = document.getElementById('draftResults');
+        const sheetId = 'YOUR_SHEET_ID'; // Replace with your Google Sheet ID
+        const prospectsUrl = `https://docs.google.com/spreadsheets/d/$1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY/gviz/tq?tqx=out:json`;
+        const teamsUrl = `https://docs.google.com/spreadsheets/d/$1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY/gviz/tq?tqx=out:json`;
 
-        // Loop through each prospect to add click event
-        prospects.forEach(prospect => {
-            prospect.addEventListener('click', function() {
-                // Highlight selected prospect
-                const selectedProspectName = this.textContent;
+        // Fetch prospects
+        fetch(prospectsUrl)
+            .then(response => response.text())
+            .then(data => {
+                const jsonData = JSON.parse(data.substr(47).slice(0, -2));
+                const prospects = jsonData.table.rows.map(row => row.c[5].v);
 
-                // Mark name as selected
-                this.classList.toggle('selected');
+                const prospectsContainer = document.getElementById('prospects');
+                prospects.forEach(prospect => {
+                    const div = document.createElement('div');
+                    div.className = 'prospect';
+                    div.textContent = prospect;
+                    prospectsContainer.appendChild(div);
+                });
+                enableProspectClick();
+            })
+            .catch(error => console.error('Error fetching prospect data:', error));
 
-                // Add click event to each team
-                teams.forEach(team => {
-                    team.onclick = function() {
-                        // Check if this team has already drafted a player
-                        const existingDraft = [...draftResults.children].some(item => item.dataset.prospectName === selectedProspectName);
-                        
-                        if (!existingDraft) {
-                            // Create a new draft entry
-                            const draftEntry = document.createElement('div');
-                            draftEntry.className = 'drafted'; // Style as drafted
-                            draftEntry.textContent = `${selectedProspectName} → ${this.textContent}`; // Text indicates who was drafted by which team
-                            draftEntry.dataset.prospectName = selectedProspectName; // Store the prospect name
+        // Fetch teams
+        fetch(teamsUrl)
+            .then(response => response.text())
+            .then(data => {
+                const jsonData = JSON.parse(data.substr(47).slice(0, -2));
+                const teams = jsonData.table.rows.map(row => row.c[0].v);
 
-                            // Append the draft entry to the draft results
-                            draftResults.appendChild(draftEntry);
-                            
-                            // Remove selected class from the prospect and show as drafted
-                            this.classList.add('drafted'); // Optionally style the team as drafted
-                            prospect.classList.remove('selected');
+                const teamsContainer = document.getElementById('teams');
+                teams.forEach((team, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'team';
+                    div.textContent = team;
+                    
+                    div.addEventListener('click', function() {
+                        // Enable editing team name
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.value = team;
+                        div.textContent = ''; // Clear the div
+                        div.appendChild(input);
+                        input.focus();
+
+                        // Save updated team name on blur or enter
+                        input.addEventListener('blur', saveTeamName);
+                        input.addEventListener('keypress', function(event) {
+                            if (event.key === 'Enter') {
+                                saveTeamName();
+                            }
+                        });
+
+                        function saveTeamName() {
+                            const newTeamName = input.value;
+                            if (newTeamName) {
+                                div.textContent = newTeamName; // Set the new team name
+                                div.classList.remove('editing'); // Remove editing class
+                            } else {
+                                div.textContent = team; // Reset to original if empty
+                            }
                         }
-                    };
+                    });
+
+                    teamsContainer.appendChild(div);
+                });
+            })
+            .catch(error => console.error('Error fetching team data:', error));
+
+        function enableProspectClick() {
+            const prospects = document.querySelectorAll('.prospect');
+            const teams = document.querySelectorAll('.team');
+            const draftResultsContainer = document.getElementById('draftResults');
+
+            prospects.forEach(prospect => {
+                prospect.addEventListener('click', function() {
+                    const selectedProspect = this.textContent;
+                    teams.forEach(team => {
+                        team.onclick = function() {
+                            if (!this.classList.contains('drafted')) {
+                                const draftEntry = document.createElement('div');
+                                draftEntry.textContent = `${selectedProspect} → ${this.textContent}`;
+                                draftEntry.className = 'drafted'; 
+                                draftResultsContainer.appendChild(draftEntry);
+                                this.classList.add('drafted'); 
+                                prospect.classList.add('drafted'); // Optionally mark prospect as drafted
+                            }
+                        };
+                    });
                 });
             });
-        });
+        }
     </script>
-
 </body>
 </html>
