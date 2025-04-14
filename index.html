@@ -154,14 +154,17 @@
             })
             .catch(error => console.error('Error fetching team data:', error));
 
-       // Display players function
         function displayPlayers(players) {
             const playersContainer = document.getElementById('players');
             playersContainer.innerHTML = ''; // Clear existing players
 
-            // Limit displayed players to 50 per page
-            const displayedPlayers = players.slice(currentPlayerOffset * playersPerPage, (currentPlayerOffset + 1) * playersPerPage);
-            displayedPlayers.forEach(player => {
+            // Only add players that fall within the currentPlayerOffset range
+            const start = currentPlayerOffset * playersPerPage;
+            const end = Math.min(start + playersPerPage, players.length);
+
+            // Check if we have players to show
+            for (let i = start; i < end; i++) {
+                const player = players[i];
                 const playerDiv = document.createElement('div');
                 playerDiv.className = 'prospect';
 
@@ -173,7 +176,7 @@
 
                 playerDiv.appendChild(playerName);
                 playersContainer.appendChild(playerDiv);
-            });
+            }
         }
 
         function displayDraftOrder(teams) {
@@ -276,7 +279,8 @@
 
                 // Add the player back to the pool
                 players.push(player); // Restore the player to the players pool
-                filteredPlayers.push(player); // Restore to the filtered pool for display
+                filteredPlayers = [...players]; // Reset filtered players to include the newly restored player
+                sortPlayersByRanking(); // Sort players by ranking
                 displayPlayers(filteredPlayers); // Update the display
 
                 // Add the team back to the draft order
@@ -294,27 +298,19 @@
             }
         }
 
-        // Show more players function removed
-        
-      // Function to sort players by ranking
+        // Function to sort players by ranking
         function sortPlayersByRanking() {
             players.sort((a, b) => parseInt(a.ranking) - parseInt(b.ranking)); // Show higher ranking first
         }
 
         // Initial call to show players when the page loads
         displayPlayers(filteredPlayers); // Initial call to show players
-        
-        // Update number of draft rounds
+        // Event listeners at the bottom for clarity
         document.getElementById('updateRounds').addEventListener('click', () => {
             const numRoundsInput = document.getElementById('numRounds').value;
             numRounds = Math.max(1, Math.min(7, Number(numRoundsInput))); // Ensure it is between 1 and 7
             displayDraftOrder(teams); // Re-display draft order with updated number of rounds
         });
-
-        // Initial population of players without the show more button
-        displayPlayers(filteredPlayers); // Initial call to show players
-
-        // Set up the undo button click event
         document.getElementById('undoPick').addEventListener('click', undoLastPick); // Bind undo functionality
         
     </script>
