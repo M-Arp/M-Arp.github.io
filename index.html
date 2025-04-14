@@ -54,14 +54,14 @@
             margin-left: 10px;
             cursor: pointer;
         }
+        .show-more-button {
+            margin-top: 10px;
+            cursor: pointer;
+        }
         .player-name {
             cursor: pointer;
             color: blue;
             text-decoration: underline;
-        }
-        .navigation-button {
-            cursor: pointer;
-            margin-top: 10px;
         }
     </style>
 </head>
@@ -85,18 +85,20 @@
             <button class="filter-button" onclick="resetFilter()">All</button> <!-- Reset button -->
         </div>
         <div id="players"></div>
+        <button id="showMorePlayers" class="show-more-button" style="display: none;">Show More Players</button>
     </div>
 
     <div class="column">
         <h2>Draft Order</h2>
+        <label for="numRounds">Number of Draft Rounds:</label>
+        <input type="number" id="numRounds" min="1" max="7" value="3">
+        <button id="updateRounds">Update</button>
         <div id="draftOrder"></div>
-
-        </div>
+        <button id="undoPick" style="display: none;">Undo Last Pick</button> <!-- Undo Button -->
     </div>
 
     <div class="column">
         <h2>Draft Results</h2>
-     <button id="undoPick" style="display: none;">Undo Last Pick</button> <!-- Undo Button -->
         <div id="draftResults"></div>
     </div>
 
@@ -110,11 +112,12 @@
         let players = [];
         let teams = [];
         let currentDraftPick = 0; // Track the current draft pick index
+        let numRounds = 3; // Default number of draft rounds
+        let currentPlayerOffset = 0; // Offset for currently displayed players
         const playersPerPage = 50; // Number of players to show at once
         let filteredPlayers = []; // To hold filtered player data
         let activeFilters = new Set(); // Set to track active filters
         let draftHistory = []; // Array to keep track of assigned players for undo functionality
-        let currentViewOffset = 0; // Track the current offset for displayed picks
 
         // Fetch players
         fetch(playersUrl)
@@ -158,12 +161,17 @@
             })
             .catch(error => console.error('Error fetching team data:', error));
 
-        function displayPlayers(players) {
+       function displayPlayers(players) {
             const playersContainer = document.getElementById('players');
             playersContainer.innerHTML = ''; // Clear existing players
 
-            // Display all players
-            players.forEach(player => {
+            // Only add players that fall within the currentPlayerOffset range
+            const start = currentPlayerOffset * playersPerPage;
+            const end = Math.min(start + playersPerPage, players.length);
+
+            // Check if we have players to show
+            for (let i = start; i < end; i++) {
+                const player = players[i];
                 const playerDiv = document.createElement('div');
                 playerDiv.className = 'prospect';
 
@@ -175,37 +183,39 @@
 
                 playerDiv.appendChild(playerName);
                 playersContainer.appendChild(playerDiv);
-            });
+            }
+
+            // Show "Show More Players" button only if there are more than what's currently displayed
+            if (end < players.length) {
+                document.getElementById('showMorePlayers').style.display = 'block';
+            } else {
+                document.getElementById('showMorePlayers').style.display = 'none';
+            }
         }
 
-function displayDraftOrder(teams) {
-    const draftOrderContainer = document.getElementById('draftOrder');
-    draftOrderContainer.innerHTML = ''; // Clear existing teams
+        function displayDraftOrder(teams) {
+            const draftOrderContainer = document.getElementById('draftOrder');
+            draftOrderContainer.innerHTML = ''; // Clear existing teams
 
-    // Show only the next 32 teams
-    const endIndex = Math.min(teams.length, currentViewOffset + 32);
-    const visibleTeams = teams.slice(currentViewOffset, endIndex);
-
-    visibleTeams.forEach((team, index) => {
-        const teamDiv = document.createElement('div');
-        teamDiv.className = 'team';
-        const teamNumber = currentViewOffset + index + 1; // Adjust number based on current offset
-        teamDiv.innerHTML = `${teamNumber}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">`;
-        
-        // Add Edit button for each team
-        const editButton = document.createElement('button');
-        editButton.innerText = 'Edit';
-        editButton.className = 'edit-button';
-        editButton.onclick = () => editTeamName(team, teamDiv);
-        
-        teamDiv.appendChild(editButton);
-        draftOrderContainer.appendChild(teamDiv);
-    });
-
-    // Automatically highlight the next team for picking
-    highlightNextTeam();
-}
-
+            // Show only the specified number of rounds
+            for (let i = 0; i < Math.min(numRounds, teams.length); i++) {
+                const team = teams[i];
+                const teamDiv = document.createElement('div');
+                teamDiv.className = 'team';
+                teamDiv.innerHTML = `${team.draftOrder}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">`;
+                
+                // Add Edit button for each team
+                const editButton = document.createElement('button');
+                editButton.innerText = 'Edit';
+                editButton.className = 'edit-button';
+                editButton.onclick = () => editTeamName(team, teamDiv);
+                
+                teamDiv.appendChild(editButton);
+                draftOrderContainer.appendChild(teamDiv);
+            }
+            // Automatically highlight next team for picking
+            highlightNextTeam();
+        }
 
         function highlightNextTeam() {
             const teamDivs = document.querySelectorAll('.team');
@@ -222,6 +232,7 @@ function displayDraftOrder(teams) {
                 activeFilters.add(position); // Add the filter
             }
 
+            currentPlayerOffset = 0; // Reset offset on filter change
             applyFilters(); // Apply filters to the player list
         }
 
@@ -236,6 +247,7 @@ function displayDraftOrder(teams) {
 
         function resetFilter() {
             activeFilters.clear(); // Clear all active filters
+            currentPlayerOffset = 0; // Reset offset
             filteredPlayers = players; // Reset filtered players to original
             displayPlayers(filteredPlayers); // Display all players
         }
@@ -299,20 +311,22 @@ function displayDraftOrder(teams) {
             }
         }
 
-        // Navigate to the next or previous 32 picks
-        function navigatePicks(direction) {
-            // Adjust the current offset based on direction
-            currentViewOffset += direction * 32;
-
-            // Make sure the offset does not go out of bounds
-            currentViewOffset = Math.max(0, Math.min(currentViewOffset, teams.length - 32));
-
-            // Update the display of draft order
-            displayDraftOrder(teams);
+        // Show more players function
+        function showMorePlayers() {
+            currentPlayerOffset++; // Increment offset to load next set of players
+            displayPlayers(filteredPlayers); // Re-display player pool with new offset
         }
 
-        // Bind undo functionality
-        document.getElementById('undoPick').addEventListener('click', undoLastPick);
+        document.getElementById('showMorePlayers').addEventListener('click', showMorePlayers);
+        document.getElementById('undoPick').addEventListener('click', undoLastPick); // Bind undo functionality
+
+        // Update number of draft rounds
+        document.getElementById('updateRounds').addEventListener('click', () => {
+            const numRoundsInput = document.getElementById('numRounds').value;
+            numRounds = Math.max(1, Math.min(7, Number(numRoundsInput))); // Ensure it is between 1 and 7
+            displayDraftOrder(teams); // Re-display draft order with updated number of rounds
+        });
+        
     </script>
 </body>
 </html>
