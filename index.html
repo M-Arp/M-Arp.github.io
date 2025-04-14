@@ -46,9 +46,10 @@
             background-color: #e6e6e6;
             transition: background-color 0.3s;
             margin: 3px; /* Add some margin */
+            flex: 1 1 45%; /* Allow buttons to grow and take 45% width */
         }
         .filter-button.active {
-            background-color: #c2c2c2; /* Change color for active buttons */
+            background-color: #747474; /* Change color for active buttons */
         }
         .edit-button {
             margin-left: 10px;
@@ -60,7 +61,7 @@
         }
         .player-name {
             cursor: pointer;
-            color: blue;
+            color: black;
         }
     </style>
 </head>
@@ -92,11 +93,12 @@
         <input type="number" id="numRounds" min="1" max="7" value="3">
         <button id="updateRounds">Update</button>
         <div id="draftOrder"></div>
-        <button id="undoPick" style="display: none;">Undo Last Pick</button> <!-- Undo Button -->
+
     </div>
 
     <div class="column">
         <h2>Draft Results</h2>
+        <button id="undoPick" style="display: none;">Undo Last Pick</button> <!-- Undo Button -->
         <div id="draftResults"></div>
     </div>
 
