@@ -90,7 +90,7 @@
     <div class="column">
         <h2>Draft Order</h2>
         <label for="numRounds">Number of Draft Rounds:</label>
-        <input type="number" id="numRounds" min="1" max="7" value="3">
+        <input type="number" id="numRounds" min="1" max="257" value="32">
         <button id="updateRounds">Update</button>
         <div id="draftOrder"></div>
 
@@ -112,7 +112,7 @@
         let players = [];
         let teams = [];
         let currentDraftPick = 0; // Track the current draft pick index
-        let numRounds = 3; // Default number of draft rounds
+        let numRounds = 32; // Default number of draft rounds
         let currentPlayerOffset = 0; // Offset for currently displayed players
         const playersPerPage = 50; // Number of players to show at once
         let filteredPlayers = []; // To hold filtered player data
