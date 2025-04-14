@@ -106,7 +106,7 @@
 
         const playersUrl = `https://docs.google.com/spreadsheets/d/1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY/gviz/tq?tqx=out:json`;
         const teamsUrl = `https://docs.google.com/spreadsheets/d/1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0/gviz/tq?tqx=out:json`;
-
+ 
         let players = [];
         let teams = [];
         let currentDraftPick = 0; // Track the current draft pick index
@@ -116,6 +116,7 @@
         let filteredPlayers = []; // To hold filtered player data
         let activeFilters = new Set(); // Set to track active filters
         let draftHistory = []; // Array to keep track of assigned players for undo functionality
+
         
 
         // Fetch players
@@ -153,17 +154,14 @@
             })
             .catch(error => console.error('Error fetching team data:', error));
 
+       // Display players function
         function displayPlayers(players) {
             const playersContainer = document.getElementById('players');
             playersContainer.innerHTML = ''; // Clear existing players
 
-            // Only add players that fall within the currentPlayerOffset range
-            const start = currentPlayerOffset * playersPerPage;
-            const end = Math.min(start + playersPerPage, players.length);
-
-            // Check if we have players to show
-            for (let i = start; i < end; i++) {
-                const player = players[i];
+            // Limit displayed players to 50 per page
+            const displayedPlayers = players.slice(currentPlayerOffset * playersPerPage, (currentPlayerOffset + 1) * playersPerPage);
+            displayedPlayers.forEach(player => {
                 const playerDiv = document.createElement('div');
                 playerDiv.className = 'prospect';
 
@@ -175,8 +173,7 @@
 
                 playerDiv.appendChild(playerName);
                 playersContainer.appendChild(playerDiv);
-            }
-
+            });
         }
 
         function displayDraftOrder(teams) {
@@ -248,7 +245,7 @@
                 document.getElementById('draftResults').appendChild(draftEntry);
 
                 // Record the assignment for undo functionality
-                draftHistory.push({ player, team }); // Store the last draft entry
+                draftHistory.push({ player: { ...player }, team }); // Store a copy of the last draft entry
                 
                 // Remove the drafted player from the pool
                 players = players.filter(p => p.name !== player.name);
@@ -257,7 +254,7 @@
                 
                 // Remove the drafted team from the draft order
                 teams.splice(currentDraftPick, 1); // Remove the current team
-                currentDraftPick = Math.max(0, currentDraftPick - 1); // Adjust the draft pick index if needed
+                currentDraftPick = Math.max(0, currentDraftPick - 1); // Adjust draft pick index if needed
                 displayDraftOrder(teams); // Update draft order display
 
                 // Move to the next draft pick, if available
@@ -278,8 +275,8 @@
                 const { player, team } = lastDraft;
 
                 // Add the player back to the pool
-                players.push(player); // Restore the player to the inner pool
-                filteredPlayers.push(player); // Also restore to the filtered pool for display
+                players.push(player); // Restore the player to the players pool
+                filteredPlayers.push(player); // Restore to the filtered pool for display
                 displayPlayers(filteredPlayers); // Update the display
 
                 // Add the team back to the draft order
@@ -297,6 +294,7 @@
             }
         }
 
+        // Show more players function removed
 
         // Update number of draft rounds
         document.getElementById('updateRounds').addEventListener('click', () => {
@@ -304,6 +302,12 @@
             numRounds = Math.max(1, Math.min(7, Number(numRoundsInput))); // Ensure it is between 1 and 7
             displayDraftOrder(teams); // Re-display draft order with updated number of rounds
         });
+
+        // Initial population of players without the show more button
+        displayPlayers(filteredPlayers); // Initial call to show players
+
+        // Set up the undo button click event
+        document.getElementById('undoPick').addEventListener('click', undoLastPick); // Bind undo functionality
         
     </script>
 </body>
