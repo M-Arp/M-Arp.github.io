@@ -165,29 +165,32 @@
             }
         }
 
-        function displayDraftOrder(teams) {
-            const draftOrderContainer = document.getElementById('draftOrder');
-            draftOrderContainer.innerHTML = ''; // Clear existing teams
+function displayDraftOrder(teams) {
+    const draftOrderContainer = document.getElementById('draftOrder');
+    draftOrderContainer.innerHTML = ''; // Clear existing teams
 
-            // Show all teams (without rounds)
-            teams.forEach((team, index) => {
-                const teamDiv = document.createElement('div');
-                teamDiv.className = 'team';
-                teamDiv.innerHTML = `${index + 1}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">`;
-                
-                // Add Edit button for each team
-                const editButton = document.createElement('button');
-                editButton.innerText = 'Edit';
-                editButton.className = 'edit-button';
-                editButton.onclick = () => editTeamName(team, teamDiv);
-                
-                teamDiv.appendChild(editButton);
-                draftOrderContainer.appendChild(teamDiv);
-            });
+    // Show all teams (without rounds)
+    let teamIndex = 0; // Variable to track the current team index
+    teams.forEach(team => {
+        const teamDiv = document.createElement('div');
+        teamDiv.className = 'team';
+        teamDiv.innerHTML = `${teamIndex + 1}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">`;
+        
+        // Add Edit button for each team
+        const editButton = document.createElement('button');
+        editButton.innerText = 'Edit';
+        editButton.className = 'edit-button';
+        editButton.onclick = () => editTeamName(team, teamDiv);
+        
+        teamDiv.appendChild(editButton);
+        draftOrderContainer.appendChild(teamDiv);
+        
+        teamIndex++; // Increment the team index
+    });
 
-            // Automatically highlight next team for picking
-            highlightNextTeam();
-        }
+    // Automatically highlight next team for picking
+    highlightNextTeam();
+}
 
         function highlightNextTeam() {
             const teamDivs = document.querySelectorAll('.team');
