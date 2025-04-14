@@ -91,15 +91,14 @@
     <div class="column">
         <h2>Draft Order</h2>
         <label for="numRounds">Number of Draft Rounds:</label>
-        <input type="number" id="numRounds" min="1" max="257" value="32">
+        <input type="number" id="numRounds" min="1" max="7" value="3">
         <button id="updateRounds">Update</button>
         <div id="draftOrder"></div>
-       
+        <button id="undoPick" style="display: none;">Undo Last Pick</button> <!-- Undo Button -->
     </div>
 
     <div class="column">
         <h2>Draft Results</h2>
-         <button id="undoPick" style="display: none;">Undo Last Pick</button> <!-- Undo Button -->
         <div id="draftResults"></div>
     </div>
 
@@ -109,15 +108,15 @@
 
         const playersUrl = `https://docs.google.com/spreadsheets/d/1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY/gviz/tq?tqx=out:json`;
         const teamsUrl = `https://docs.google.com/spreadsheets/d/1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0/gviz/tq?tqx=out:json`;
-
         let players = [];
         let teams = [];
         let currentDraftPick = 0; // Track the current draft pick index
+        let numRounds = 3; // Default number of draft rounds
+        let currentPlayerOffset = 0; // Offset for currently displayed players
         const playersPerPage = 50; // Number of players to show at once
         let filteredPlayers = []; // To hold filtered player data
         let activeFilters = new Set(); // Set to track active filters
         let draftHistory = []; // Array to keep track of assigned players for undo functionality
-        let currentViewOffset = 0; // Track the current offset for displayed picks
 
         // Fetch players
         fetch(playersUrl)
@@ -161,7 +160,7 @@
             })
             .catch(error => console.error('Error fetching team data:', error));
 
-       function displayPlayers(players) {
+        function displayPlayers(players) {
             const playersContainer = document.getElementById('players');
             playersContainer.innerHTML = ''; // Clear existing players
 
@@ -286,38 +285,44 @@
         }
 
         // Undo the last pick
-function undoLastPick() {
-    if (draftHistory.length > 0) {
-        const lastDraft = draftHistory.pop(); // Get the last drafted player and team
-        const { player, team } = lastDraft;
+        function undoLastPick() {
+            if (draftHistory.length > 0) {
+                const lastDraft = draftHistory.pop(); // Get the last drafted player and team
+                const { player, team } = lastDraft;
 
-        // Add the player back to the pool
-        players.push(player);
-        filteredPlayers.push(player); // Ensure the filtered player list is updated as well
-        displayPlayers(filteredPlayers); // Update displayed players 
+                // Add the player back to the pool
+                players.push(player);
+                filteredPlayers.push(player);
+                displayPlayers(filteredPlayers); // Update display
 
-        // Add the team back to the draft order
-        teams.unshift(team); // Reinsert the team at the front
-        displayDraftOrder(teams); // Refresh draft order display
+                // Add the team back to the draft order
+                teams.unshift(team); // Reinsert the team at the start
+                displayDraftOrder(teams); // Refresh draft order display
 
-        // Remove the last drafted entry from draft results
-        const draftResultsContainer = document.getElementById('draftResults');
-        draftResultsContainer.removeChild(draftResultsContainer.lastChild); // Remove the last drafted entry
+                // Remove from drafted results
+                const draftResultsContainer = document.getElementById('draftResults');
+                draftResultsContainer.removeChild(draftResultsContainer.lastChild); // Remove the last drafted entry
 
-        // Hide the undo button if no picks left to undo
-        if (draftHistory.length === 0) {
-            document.getElementById('undoPick').style.display = 'none';
+                // Hide the undo button if no picks left to undo
+                if (draftHistory.length === 0) {
+                    document.getElementById('undoPick').style.display = 'none';
+                }
+            }
         }
-    }
-}
-        // Bind undo functionality
-        document.getElementById('undoPick').addEventListener('click', undoLastPick);
-        
+
+        // Show more players function
+        function showMorePlayers() {
+            currentPlayerOffset++; // Increment offset to load next set of players
+            displayPlayers(filteredPlayers); // Re-display player pool with new offset
+        }
+
+        document.getElementById('showMorePlayers').addEventListener('click', showMorePlayers);
+        document.getElementById('undoPick').addEventListener('click', undoLastPick); // Bind undo functionality
 
         // Update number of draft rounds
         document.getElementById('updateRounds').addEventListener('click', () => {
             const numRoundsInput = document.getElementById('numRounds').value;
-            numRounds = Math.max(1, Math.min(257, Number(numRoundsInput))); // Ensure it is between 1 and 7
+            numRounds = Math.max(1, Math.min(7, Number(numRoundsInput))); // Ensure it is between 1 and 7
             displayDraftOrder(teams); // Re-display draft order with updated number of rounds
         });
         
