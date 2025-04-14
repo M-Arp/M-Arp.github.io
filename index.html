@@ -107,7 +107,7 @@
         let players = [];
         let teams = [];
         let currentDraftPick = 0; // Track the current draft pick index
-        let numRounds = 3; // Default number of draft rounds
+        let numRounds = 32; // Default number of draft rounds
         let currentPlayerOffset = 0; // Offset for currently displayed players
         const playersPerPage = 50; // Number of players to show at once
         let filteredPlayers = []; // To hold filtered player data
@@ -143,7 +143,7 @@
             .catch(error => console.error('Error fetching team data:', error));
 
         // Display players with Rank | Name | Position format
-      function displayPlayers(players) {
+   function displayPlayers(players) {
             const playersContainer = document.getElementById('players');
             playersContainer.innerHTML = ''; // Clear existing players
 
@@ -156,18 +156,16 @@
                 const player = players[i];
                 const playerDiv = document.createElement('div');
                 playerDiv.className = 'prospect';
-                playerDiv.textContent = `${player.ranking} | ${player.name} | ${player.position}`;
-                playerDiv.onclick = () => assignPlayerToDraft(player);
+
+                // Create a clickable name element
+                const playerName = document.createElement('span');
+                playerName.className = 'player-name';
+                playerName.textContent = `${player.ranking} | ${player.name} | ${player.position}`;
+                playerName.onclick = () => assignPlayerToDraft(player); // Assign player on click
+
+                playerDiv.appendChild(playerName);
                 playersContainer.appendChild(playerDiv);
             }
-
-            // Show "Show More Players" button only if there are more than what's currently displayed
-            if (end < players.length) {
-                document.getElementById('showMorePlayers').style.display = 'block';
-            } else {
-                document.getElementById('showMorePlayers').style.display = 'none';
-            }
-        }
 
         function displayDraftOrder(teams) {
             const draftOrderContainer = document.getElementById('draftOrder');
