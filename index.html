@@ -59,6 +59,11 @@
             margin-top: 10px;
             cursor: pointer;
         }
+        .player-name {
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -166,6 +171,13 @@
                 playerDiv.appendChild(playerName);
                 playersContainer.appendChild(playerDiv);
             }
+                   // Show "Show More Players" button only if there are more than what's currently displayed
+            if (end < players.length) {
+                document.getElementById('showMorePlayers').style.display = 'block';
+            } else {
+                document.getElementById('showMorePlayers').style.display = 'none';
+            }
+        }
 
         function displayDraftOrder(teams) {
             const draftOrderContainer = document.getElementById('draftOrder');
