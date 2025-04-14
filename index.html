@@ -295,7 +295,15 @@
         }
 
         // Show more players function removed
+        
+      // Function to sort players by ranking
+        function sortPlayersByRanking() {
+            players.sort((a, b) => parseInt(a.ranking) - parseInt(b.ranking)); // Show higher ranking first
+        }
 
+        // Initial call to show players when the page loads
+        displayPlayers(filteredPlayers); // Initial call to show players
+        
         // Update number of draft rounds
         document.getElementById('updateRounds').addEventListener('click', () => {
             const numRoundsInput = document.getElementById('numRounds').value;
