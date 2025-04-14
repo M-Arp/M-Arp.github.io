@@ -177,12 +177,6 @@
                 playersContainer.appendChild(playerDiv);
             }
 
-            // Show "Show More Players" button only if there are more than what's currently displayed
-            if (end < players.length) {
-                document.getElementById('showMorePlayers').style.display = 'block';
-            } else {
-                document.getElementById('showMorePlayers').style.display = 'none';
-            }
         }
 
         function displayDraftOrder(teams) {
