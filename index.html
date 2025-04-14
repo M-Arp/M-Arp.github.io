@@ -25,7 +25,6 @@
             padding: 10px;
             margin: 5px 0;
             background-color: #e0e0e0;
-            cursor: pointer;
             border: 1px solid #ddd;
             border-radius: 4px;
         }
@@ -59,6 +58,11 @@
             margin-top: 10px;
             cursor: pointer;
         }
+        .player-name {
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -86,8 +90,8 @@
 
     <div class="column">
         <h2>Draft Order</h2>
-        <label for="numRounds">Number of Players:</label>
-        <input type="number" id="numRounds" min="1" max="257" value="32">
+        <label for="numRounds">Number of Draft Rounds:</label>
+        <input type="number" id="numRounds" min="1" max="7" value="3">
         <button id="updateRounds">Update</button>
         <div id="draftOrder"></div>
     </div>
@@ -124,7 +128,8 @@
                     school: row.c[8]?.v,    // Player school
                     ranking: row.c[0]?.v     // Player ranking
                 }));
-                displayPlayers(players);
+                filteredPlayers = players; // Initialize filtered players
+                displayPlayers(filteredPlayers);
             })
             .catch(error => console.error('Error fetching player data:', error));
 
@@ -143,7 +148,7 @@
             .catch(error => console.error('Error fetching team data:', error));
 
         // Display players with Rank | Name | Position format
-   function displayPlayers(players) {
+        function displayPlayers(players) {
             const playersContainer = document.getElementById('players');
             playersContainer.innerHTML = ''; // Clear existing players
 
@@ -166,7 +171,8 @@
                 playerDiv.appendChild(playerName);
                 playersContainer.appendChild(playerDiv);
             }
-                   // Show "Show More Players" button only if there are more than what's currently displayed
+
+            // Show "Show More Players" button only if there are more than what's currently displayed
             if (end < players.length) {
                 document.getElementById('showMorePlayers').style.display = 'block';
             } else {
@@ -241,10 +247,37 @@
 
         document.getElementById('showMorePlayers').addEventListener('click', showMorePlayers);
 
+        // Assign player to current team
+        function assignPlayerToDraft(player) {
+            if (currentDraftPick < teams.length) {
+                const team = teams[currentDraftPick]; // Get the current team
+                const draftEntry = document.createElement('div');
+                draftEntry.textContent = `${player.name} (Rank: ${player.ranking}) assigned to ${team.name}`;
+                draftEntry.className = 'drafted';
+                document.getElementById('draftResults').appendChild(draftEntry);
+
+                // Remove the drafted player from the pool
+                players = players.filter(p => p.name !== player.name);
+                filteredPlayers = filteredPlayers.filter(p => p.name !== player.name); // Also filter from displayed players
+                displayPlayers(filteredPlayers); // Update player display
+
+                // Remove the drafted team from the draft order
+                teams.splice(currentDraftPick, 1); // Remove the current team
+                currentDraftPick = Math.max(0, currentDraftPick - 1); // Adjust the draft pick index if needed
+                displayDraftOrder(teams); // Update draft order display
+
+                // Move to the next draft pick, if available
+                if (currentDraftPick >= teams.length) {
+                    currentDraftPick = 0; // If the end of the list is reached, reset to the first team
+                }
+                highlightNextTeam(); // Highlight the next team
+            }
+        }
+
         // Update number of draft rounds
         document.getElementById('updateRounds').addEventListener('click', () => {
             const numRoundsInput = document.getElementById('numRounds').value;
-            numRounds = Math.max(1, Math.min(257, Number(numRoundsInput))); // Ensure it is between 1 and 7
+            numRounds = Math.max(1, Math.min(7, Number(numRoundsInput))); // Ensure it is between 1 and 7
             displayDraftOrder(teams); // Re-display draft order with updated number of rounds
         });
 
