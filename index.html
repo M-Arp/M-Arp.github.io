@@ -85,7 +85,6 @@
             <button class="filter-button" onclick="resetFilter()">All</button> <!-- Reset button -->
         </div>
         <div id="players"></div>
-        <button id="showMorePlayers" class="show-more-button" style="display: none;">Show More Players</button>
     </div>
 
     <div class="column">
@@ -126,16 +125,9 @@
             .then(data => {
                 const jsonData = JSON.parse(data.substr(47).slice(0, -2));
                 players = jsonData.table.rows.map(row => ({
-
                     name: row.c[5]?.v,      // Player name
- 
-
                     position: row.c[6]?.v,  // Player position
- 
-
                     school: row.c[8]?.v,    // Player school
- 
-
                     ranking: row.c[0]?.v     // Player ranking
                 }));
                 filteredPlayers = players; // Initialize filtered players
@@ -312,14 +304,6 @@
             }
         }
 
-        // Show more players function
-        function showMorePlayers() {
-            currentPlayerOffset++; // Increment offset to load next set of players
-            displayPlayers(filteredPlayers); // Re-display player pool with new offset
-        }
-
-        document.getElementById('showMorePlayers').addEventListener('click', showMorePlayers);
-        document.getElementById('undoPick').addEventListener('click', undoLastPick); // Bind undo functionality
 
         // Update number of draft rounds
         document.getElementById('updateRounds').addEventListener('click', () => {
