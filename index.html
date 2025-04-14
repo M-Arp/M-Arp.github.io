@@ -206,13 +206,6 @@ function displayDraftOrder(teams) {
     highlightNextTeam();
 }
 
-            // Show or hide navigation buttons
-            document.getElementById('prevPick').style.display = currentViewOffset > 0 ? 'block' : 'none';
-            document.getElementById('nextPick').style.display = endIndex < teams.length ? 'block' : 'none';
-
-            // Automatically highlight the next team for picking
-            highlightNextTeam();
-        }
 
         function highlightNextTeam() {
             const teamDivs = document.querySelectorAll('.team');
