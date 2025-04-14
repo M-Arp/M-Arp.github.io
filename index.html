@@ -57,6 +57,7 @@
         .player-name {
             cursor: pointer;
             color: blue;
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -115,10 +116,10 @@
             .then(data => {
                 const jsonData = JSON.parse(data.substr(47).slice(0, -2));
                 players = jsonData.table.rows.map(row => ({
-                    name: row.c[5]?.v,      // Player name
-                    position: row.c[6]?.v,  // Player position
-                    school: row.c[8]?.v,    // Player school
-                    ranking: row.c[0]?.v     // Player ranking
+                    name: row.c[0]?.v,      // Player name
+                    position: row.c[1]?.v,  // Player position
+                    school: row.c[2]?.v,    // Player school
+                    ranking: row.c[3]?.v     // Player ranking
                 }));
                 filteredPlayers = players; // Initialize filtered players
                 displayPlayers(filteredPlayers);
@@ -131,9 +132,9 @@
             .then(data => {
                 const jsonData = JSON.parse(data.substr(47).slice(0, -2));
                 teams = jsonData.table.rows.map(row => ({
-                    name: row.c[2]?.v,      // Team name
-                     logo: row.c[3]?.v,      // Team logo URL
-                     draftOrder: row.c[1]?.v // Draft order
+                    name: row.c[0]?.v,      // Team name
+                    logo: row.c[1]?.v,      // Team logo URL
+                    draftOrder: row.c[2]?.v // Draft order
                 }));
                 displayDraftOrder(teams);
             })
@@ -164,32 +165,35 @@
             }
         }
 
-function displayDraftOrder(teams) {
-    const draftOrderContainer = document.getElementById('draftOrder');
-    draftOrderContainer.innerHTML = ''; // Clear existing teams
+        function displayDraftOrder(teams) {
+            const draftOrderContainer = document.getElementById('draftOrder');
+            draftOrderContainer.innerHTML = ''; // Clear existing teams
 
-    // Show all teams (without rounds)
-    let teamIndex = 0; // Variable to track the current team index
-    teams.forEach(team => {
-        const teamDiv = document.createElement('div');
-        teamDiv.className = 'team';
-        teamDiv.innerHTML = `${teamIndex + 1}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">`;
-        
-        // Add Edit button for each team
-        const editButton = document.createElement('button');
-        editButton.innerText = 'Edit';
-        editButton.className = 'edit-button';
-        editButton.onclick = () => editTeamName(team, teamDiv);
-        
-        teamDiv.appendChild(editButton);
-        draftOrderContainer.appendChild(teamDiv);
-        
-        teamIndex++; // Increment the team index
-    });
+            // Show all teams in their correct order based on current draft pick index
+            let teamIndex = 0;
+            teams.forEach((team, index) => {
+                if (index === currentDraftPick) {
+                    teamIndex = teams.length;
+                }
+                const teamDiv = document.createElement('div');
+                teamDiv.className = 'team';
+                teamDiv.innerHTML = `${teamIndex}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">`;
+                
+                // Add Edit button for each team
+                const editButton = document.createElement('button');
+                editButton.innerText = 'Edit';
+                editButton.className = 'edit-button';
+                editButton.onclick = () => editTeamName(team, teamDiv);
+                
+                teamDiv.appendChild(editButton);
+                draftOrderContainer.appendChild(teamDiv);
+                
+                teamIndex++;
+            });
 
-    // Automatically highlight next team for picking
-    highlightNextTeam();
-}
+            // Automatically highlight the next team for picking
+            highlightNextTeam();
+        }
 
         function highlightNextTeam() {
             const teamDivs = document.querySelectorAll('.team');
@@ -259,34 +263,96 @@ function displayDraftOrder(teams) {
             }
         }
 
-        // Undo the last pick
-        function undoLastPick() {
-            if (draftHistory.length > 0) {
-                const lastDraft = draftHistory.pop(); // Get the last drafted player and team
-                const { player, team } = lastDraft;
+        function editTeamName(team, teamDiv) {
+          const inputField = document.createElement("input");
+          inputField.type='text';
+          inputField.value=team.name;
 
-                // Add the player back to the pool
-                players.push(player);
-                filteredPlayers.push(player);
-                displayPlayers(filteredPlayers); // Update display
+          inputField.onblur=() => saveTeamName(team,inputField,teamDiv);
+          inputField.onkeypress= (e)=>{
+              if(e.key==='Enter'){
+                  saveTeamName(team,inputField,teamDiv)
+              }
+          };
+          teamDiv.querySelector('.team-name').innerHTML='';
+          teamDiv.querySelector('.team-name').appendChild(inputField);
+          inputField.focus();
 
-                // Add the team back to the draft order
-                teams.unshift(team); // Reinsert the team at the start
-                displayDraftOrder(teams); // Refresh draft order display
+          function saveTeamName(team,inputField,teamDiv){
+              team.name=inputField.value;
+              displayDraftOrder(teams);
+          }
+      }
 
-                // Remove from drafted results
-                const draftResultsContainer = document.getElementById('draftResults');
-                draftResultsContainer.removeChild(draftResultsContainer.lastChild); // Remove the last drafted entry
+      function undoLastPick() {
+          if (draftHistory.length > 0) {
+              const lastDraft=draftHistory.pop(); // Get the last drafted player and team
 
-                // Hide the undo button if no picks left to undo
-                if (draftHistory.length === 0) {
-                    document.getElementById('undoPick').style.display = 'none';
-                }
-            }
-        }
+              const {player,team}=lastDraft;
 
-        // Bind undo functionality
-        document.getElementById('undoPick').addEventListener('click', undoLastPick);
+              // Add the player back to the pool
+              players.push(player);
+              filteredPlayers.push(player);
+              displayPlayers(filteredPlayers); 
+
+              // Add the team back to the draft order
+              teams.unshift(team); 
+              displayDraftOrder(teams);
+
+              // Remove from drafted results
+              const draftResultsContainer=document.getElementById("draftResults");
+              draftResultsContainer.removeChild(draftResultsContainer.lastChild);
+
+              // Hide the undo button if no picks left to undo
+              if(draftHistory.length===0){
+                  document.getElementById("undoPick").style.display='none';
+              }
+          }
+      }
+
+      function editTeamName(team,teamDiv){
+          const inputField=document.createElement("input");
+          inputField.type='text';
+          inputField.value=team.name;
+
+          inputField.onblur=() => saveTeamName(team,inputField,teamDiv);
+          inputField.onkeypress= (e)=>{
+              if(e.key==='Enter'){
+                  saveTeamName(team,inputField,teamDiv)
+              }
+          };
+          teamDiv.querySelector('.team-name').innerHTML='';
+          teamDiv.querySelector('.team-name').appendChild(inputField);
+          inputField.focus();
+
+          function saveTeamName(team,inputField,teamDiv){
+              team.name=inputField.value;
+              displayDraftOrder(teams);
+          }
+      }
+
+      function editTeamName(team,teamDiv){
+          const inputField=document.createElement("input");
+          inputField.type='text';
+          inputField.value=team.name;
+
+          inputField.onblur=() => saveTeamName(team,inputField,teamDiv);
+          inputField.onkeypress= (e)=>{
+              if(e.key==='Enter'){
+                  saveTeamName(team,inputField,teamDiv)
+              }
+          };
+          teamDiv.querySelector('.team-name').innerHTML='';
+          teamDiv.querySelector('.team-name').appendChild(inputField);
+          inputField.focus();
+
+          function saveTeamName(team,inputField,teamDiv){
+              team.name=inputField.value;
+              displayDraftOrder(teams);
+          }
+      }
+
+      document.getElementById("undoPick").addEventListener('click', undoLastPick);
 
     </script>
 </body>
