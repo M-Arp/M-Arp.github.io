@@ -54,9 +54,14 @@
             margin-left: 10px;
             cursor: pointer;
         }
+        .show-more-button {
+            margin-top: 10px;
+            cursor: pointer;
+        }
         .player-name {
             cursor: pointer;
             color: blue;
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -80,6 +85,7 @@
             <button class="filter-button" onclick="resetFilter()">All</button> <!-- Reset button -->
         </div>
         <div id="players"></div>
+        <button id="showMorePlayers" class="show-more-button" style="display: none;">Show More Players</button>
     </div>
 
     <div class="column">
