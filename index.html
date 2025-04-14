@@ -113,12 +113,11 @@
         let players = [];
         let teams = [];
         let currentDraftPick = 0; // Track the current draft pick index
-        let numRounds = 3; // Default number of draft rounds
-        let currentPlayerOffset = 0; // Offset for currently displayed players
         const playersPerPage = 50; // Number of players to show at once
         let filteredPlayers = []; // To hold filtered player data
         let activeFilters = new Set(); // Set to track active filters
         let draftHistory = []; // Array to keep track of assigned players for undo functionality
+        let currentViewOffset = 0; // Track the current offset for displayed picks
 
         // Fetch players
         fetch(playersUrl)
@@ -311,20 +310,14 @@ function undoLastPick() {
         }
     }
 }
-
-        // Show more players function
-        function showMorePlayers() {
-            currentPlayerOffset++; // Increment offset to load next set of players
-            displayPlayers(filteredPlayers); // Re-display player pool with new offset
-        }
-
-        document.getElementById('showMorePlayers').addEventListener('click', showMorePlayers);
-        document.getElementById('undoPick').addEventListener('click', undoLastPick); // Bind undo functionality
+        // Bind undo functionality
+        document.getElementById('undoPick').addEventListener('click', undoLastPick);
+        
 
         // Update number of draft rounds
         document.getElementById('updateRounds').addEventListener('click', () => {
             const numRoundsInput = document.getElementById('numRounds').value;
-            numRounds = Math.max(1, Math.min(7, Number(numRoundsInput))); // Ensure it is between 1 and 7
+            numRounds = Math.max(1, Math.min(257, Number(numRoundsInput))); // Ensure it is between 1 and 7
             displayDraftOrder(teams); // Re-display draft order with updated number of rounds
         });
         
