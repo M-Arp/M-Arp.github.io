@@ -244,7 +244,7 @@
             if (currentDraftPick < teams.length) {
                 const team = teams[currentDraftPick]; // Get the current team
                 const draftEntry = document.createElement('div');
-                draftEntry.textContent = `${team.draftOrder}:<img src="${team.logo}" width="30"> ${player.name} (#${player.ranking})`;
+                draftEntry.textContent = `${team.draftOrder}:${team.name} | ${player.name} (#${player.ranking})`;
                 draftEntry.className = 'drafted';
                 document.getElementById('draftResults').appendChild(draftEntry);
 
