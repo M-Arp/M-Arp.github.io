@@ -168,22 +168,22 @@
             const draftOrderContainer = document.getElementById('draftOrder');
             draftOrderContainer.innerHTML = ''; // Clear existing teams
 
-            // Show only the specified number of rounds
-            for (let i = 0; i < Math.min(numRounds, teams.length); i++) {
-                const team = teams[i];
+            // Show all teams in their original order
+            teams.forEach((team, index) => {
                 const teamDiv = document.createElement('div');
                 teamDiv.className = 'team';
-                teamDiv.innerHTML = `${team.draftOrder}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">`;
-
+                teamDiv.innerHTML = `${index + 1}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">`;
+                
                 // Add Edit button for each team
                 const editButton = document.createElement('button');
                 editButton.innerText = 'Edit';
                 editButton.className = 'edit-button';
                 editButton.onclick = () => editTeamName(team, teamDiv);
-
+                
                 teamDiv.appendChild(editButton);
                 draftOrderContainer.appendChild(teamDiv);
-            }
+            });
+
             // Automatically highlight next team for picking
             highlightNextTeam();
         }
