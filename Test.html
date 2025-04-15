@@ -379,7 +379,7 @@
     </span>
 </div>
                 `;
-                document.getElementById('draftResults').appendChild(draftEntry);
+                document.getElementById('draftResults').insertBefore(draftEntry, document.getElementById('draftResults').firstChild); // Insert at the top
 
                 // Record the assignment for undo functionality
                 draftHistory.push({ player: { ...player }, team }); // Store a copy of the last draft entry
