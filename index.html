@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,12 +22,18 @@
         h2 {
             text-align: center;
         }
-        .prospect, .team, .drafted {
+        .prospect,
+        .team,
+        .drafted {
             padding: 10px;
             margin: 5px 0;
             background-color: #e0e0e0;
             border: 1px solid #ddd;
             border-radius: 4px;
+            transition: background-color 0.3s; /* Add transition for hover effects */
+        }
+        .prospect:hover {
+            background-color: #d4d4d4; /* Change background on hover */
         }
         .drafted {
             background-color: #f0f0f0;
@@ -48,26 +55,69 @@
             flex: 1 1 15%; /* Allow buttons to grow and take 45% width */
         }
         .filter-button.active {
-            background-color: #747474; /* Change color for active buttons */
+            background-color: #b0b0b0; /* Different shade of grey for active buttons */
+            color: white; /* Optional: Change text color when active for better contrast */
         }
         .edit-button {
             margin-left: 10px;
             cursor: pointer;
         }
-        .show-more-button {
-            margin-top: 10px;
-            cursor: pointer;
-        }
         .player-name {
             cursor: pointer;
             color: black;
+            text-decoration: underline;
         }
-        .edit-dropdown {
-            display: none; /* Hidden by default */
-            margin-top: 10px;
+        .prospect-content {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px; /* Space between content */
         }
+        .player-ranking {
+            font-size: 1.3em; /* Bigger font size for ranking */
+            font-weight: bold; /* Bold ranking */
+            margin-right: 10px; /* Space between ranking and name */
+        }
+        .player-details {
+            display: flex;
+            flex-direction: column; /* Stack name vertically */
+        }
+        .player-meta {
+            font-size: 0.9em; /* Slightly smaller font for details */
+            color: #555; /* Dim color for metadata */
+        }
+                /* Draft results styles */
+.draft-result {
+    margin-bottom: 10px; /* Add space between draft entries */
+    border: 1px solid #aaa; /* Optional: border for each result */
+    padding: 10px; /* Padding inside each result */
+    border-radius: 4px; /* Rounded corners */
+    display: flex; /* Flex to align pick, team, and player info */
+    align-items: center; /* Center align items vertically */
+}
+
+.draft-result {
+    margin-bottom: 10px; /* Add space between draft entries */
+    border: 1px solid #aaa; /* Optional: border for each result */
+    padding: 10px; /* Padding inside each result */
+    border-radius: 4px; /* Rounded corners */
+    display: flex; /* Flex to align pick, team, and player info */
+    align-items: center; /* Center align items vertically */
+}
+
+.draft-pick {
+    font-size: 1.3em; /* Bigger font size for draft pick */
+    font-weight: bold; /* Bold draft pick */
+    color: #333; /* Color for draft pick */
+    margin-right: 10px; /* Space to the right of the pick */
+}
+
+.team-name {
+    color: #333; /* Team name color */
+    margin-right: 10px; /* Space to separate team name from player info */
+}
     </style>
 </head>
+
 <body>
 
     <div class="column">
@@ -87,12 +137,12 @@
             <button class="filter-button" onclick="toggleFilter('ST')">ST</button>
             <button class="filter-button" onclick="resetFilter()">All</button> <!-- Reset button -->
         </div>
-        <div id="players"></div>
+        <div id="players"></div>  <!-- Player display -->
     </div>
 
     <div class="column">
         <h2>Draft Order</h2>
-        <label for="numRounds">Number of Picks:</label>
+        <label for="numRounds">Number of Draft Picks:</label>
         <input type="number" id="numRounds" min="1" max="257" value="32">
         <button id="updateRounds">Update</button>
         <div id="draftOrder"></div>
@@ -101,17 +151,19 @@
 
     <div class="column">
         <h2>Draft Results</h2>
+        <div id="draftResults">
         <button id="undoPick" style="display: none;">Undo Last Pick</button> <!-- Undo Button -->
-        <div id="draftResults"></div>
+        </div>
+
     </div>
 
     <script>
-        const playersSheetId = '1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY'; // Replace with your Players Google Sheet ID
+       const playersSheetId = '1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY'; // Replace with your Players Google Sheet ID
         const teamsSheetId = '1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0'; // Replace with your Teams Google Sheet ID
 
         const playersUrl = `https://docs.google.com/spreadsheets/d/1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY/gviz/tq?tqx=out:json`;
         const teamsUrl = `https://docs.google.com/spreadsheets/d/1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0/gviz/tq?tqx=out:json`;
- 
+
         let players = [];
         let teams = [];
         let currentDraftPick = 0; // Track the current draft pick index
@@ -122,8 +174,6 @@
         let activeFilters = new Set(); // Set to track active filters
         let draftHistory = []; // Array to keep track of assigned players for undo functionality
 
-        
-
         // Fetch players
         fetch(playersUrl)
             .then(response => response.text())
@@ -133,7 +183,7 @@
                     name: row.c[5]?.v,      // Player name
                     position: row.c[6]?.v,  // Player position
                     school: row.c[8]?.v,    // Player school
-                    ranking: row.c[0]?.v     // Player ranking
+                    ranking: row.c[1]?.v     // Player ranking
                 }));
                 filteredPlayers = players; // Initialize filtered players
                 displayPlayers(filteredPlayers);
@@ -146,13 +196,8 @@
             .then(data => {
                 const jsonData = JSON.parse(data.substr(47).slice(0, -2));
                 teams = jsonData.table.rows.map(row => ({
-
                     name: row.c[2]?.v,      // Team name
- 
-
                     logo: row.c[3]?.v,      // Team logo URL
- 
-
                     draftOrder: row.c[1]?.v // Draft order
                 }));
                 displayDraftOrder(teams);
@@ -173,13 +218,37 @@
                 const playerDiv = document.createElement('div');
                 playerDiv.className = 'prospect';
 
-                // Create a clickable name element
+                // Player content container
+                const prospectContent = document.createElement('div');
+                prospectContent.className = 'prospect-content';
+
+                // Ranking
+                const playerRanking = document.createElement('div');
+                playerRanking.className = 'player-ranking';
+                playerRanking.textContent = player.ranking;
+
+                // Player details
+                const playerDetails = document.createElement('div');
+                playerDetails.className = 'player-details';
+
                 const playerName = document.createElement('span');
                 playerName.className = 'player-name';
-                playerName.textContent = `${player.ranking} | ${player.name} | ${player.position}`;
+                playerName.textContent = player.name;
                 playerName.onclick = () => assignPlayerToDraft(player); // Assign player on click
+                
+                // Position & School are side by side with a '|'
+                const playerMeta = document.createElement('span');
+                playerMeta.className = 'player-meta';
+                playerMeta.textContent = `${player.position} | ${player.school}`;
 
-                playerDiv.appendChild(playerName);
+                // Append the player name and meta information
+                playerDetails.appendChild(playerName);
+                playerDetails.appendChild(playerMeta);
+
+                // Append ranking and details to main container
+                prospectContent.appendChild(playerRanking);
+                prospectContent.appendChild(playerDetails);
+                playerDiv.appendChild(prospectContent);
                 playersContainer.appendChild(playerDiv);
             }
         }
@@ -265,10 +334,14 @@
 
         function toggleFilter(position) {
             // Toggle the position in the active filters Set
+            const button = [...document.querySelectorAll('.filter-button')]
+                .find(btn => btn.textContent === position);
             if (activeFilters.has(position)) {
                 activeFilters.delete(position); // Remove the filter
+                button.classList.remove('active'); // Remove active class
             } else {
                 activeFilters.add(position); // Add the filter
+                button.classList.add('active'); // Add active class
             }
 
             currentPlayerOffset = 0; // Reset offset on filter change
@@ -292,12 +365,20 @@
         }
 
         // Assign player to current team
-        function assignPlayerToDraft(player) {
+     function assignPlayerToDraft(player) {
             if (currentDraftPick < teams.length) {
                 const team = teams[currentDraftPick]; // Get the current team
                 const draftEntry = document.createElement('div');
-                draftEntry.textContent = `${player.name} (Rank: ${player.ranking}) assigned to ${team.name}`;
-                draftEntry.className = 'drafted';
+                draftEntry.classList.add('draft-result'); // Add styling class
+                draftEntry.innerHTML = `
+<span class="draft-pick">${team.draftOrder}</span>
+<div>
+    <span class="team-name">${team.name}</span><br>
+    <span>${player.name} |  <span class="player-position">${player.position} (#${player.ranking}) 
+       </span>
+    </span>
+</div>
+                `;
                 document.getElementById('draftResults').appendChild(draftEntry);
 
                 // Record the assignment for undo functionality
@@ -358,13 +439,15 @@
 
         // Initial call to display players when the page loads
         displayPlayers(filteredPlayers); // Initial call to show players
+        // Event listeners at the bottom for clarity
         document.getElementById('updateRounds').addEventListener('click', () => {
             const numRoundsInput = document.getElementById('numRounds').value;
-            numRounds = Math.max(1, Math.min(7, Number(numRoundsInput))); // Ensure it is between 1 and 7
+            numRounds = Math.max(1, Math.min(257, Number(numRoundsInput))); // Ensure it is between 1 and 7
             displayDraftOrder(teams); // Re-display draft order with updated number of rounds
         });
         document.getElementById('undoPick').addEventListener('click', undoLastPick); // Bind undo functionality
         
     </script>
 </body>
+
 </html>
