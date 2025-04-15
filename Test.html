@@ -142,16 +142,19 @@
 
     <div class="column">
         <h2>Draft Order</h2>
-        <label for="numRounds">Number of Draft Rounds:</label>
-        <input type="number" id="numRounds" min="1" max="7" value="3">
+        <label for="numRounds">Number of Draft Picks:</label>
+        <input type="number" id="numRounds" min="1" max="257" value="32">
         <button id="updateRounds">Update</button>
         <div id="draftOrder"></div>
-        <button id="undoPick" style="display: none;">Undo Last Pick</button> <!-- Undo Button -->
+
     </div>
 
     <div class="column">
         <h2>Draft Results</h2>
-        <div id="draftResults"></div>
+        <div id="draftResults">
+        <button id="undoPick" style="display: none;">Undo Last Pick</button> <!-- Undo Button -->
+        </div>
+
     </div>
 
     <script>
