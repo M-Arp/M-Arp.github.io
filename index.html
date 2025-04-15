@@ -271,7 +271,45 @@
                 document.getElementById('undoPick').style.display = 'inline-block';
             }
         }
+       // Edit draft pick functionality
+        function editDraftPick(draftEntry, oldTeam) {
+            const playerName = draftEntry.dataset.playerName; // Get the stored player name
+            const teamSelect = document.createElement('select');
+            teamSelect.className = 'edit-select';
 
+            // Populate the dropdown with teams excluding the current team
+            teams.forEach(team => {
+                if (team.name !== oldTeam.name) {
+                    const option = document.createElement('option');
+                    option.value = team.name;
+                    option.textContent = team.name;
+                    teamSelect.appendChild(option);
+                }
+            });
+
+            // Button to confirm team change
+            const confirmButton = document.createElement('button');
+            confirmButton.innerText = 'Confirm Change';
+            confirmButton.onclick = () => {
+                // Find the new team based on selected option
+                const selectedTeamName = teamSelect.value;
+                const newTeam = teams.find(team => team.name === selectedTeamName);
+                
+                // Update draft entry text
+                draftEntry.textContent = `${playerName} (Rank: ${draftEntry.dataset.playerRanking}) assigned to ${newTeam.name}`;
+                draftEntry.appendChild(confirmButton); // Remove button after confirming
+
+                // Insert team select for editing
+                draftEntry.appendChild(teamSelect);
+
+                // Handle the change in draft results as needed, such as calling a &remove& function                  
+            };
+            
+            // Clear draft entry and replace with dropdown and confirm button
+            draftEntry.innerHTML = ''; // Clear existing contents
+            draftEntry.appendChild(teamSelect); // Add the team dropdown
+            draftEntry.appendChild(confirmButton); // Add the confirm button
+        }
         // Undo the last pick
         function undoLastPick() {
             if (draftHistory.length > 0) {
