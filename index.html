@@ -62,8 +62,8 @@
             cursor: pointer;
             color: black;
         }
-            .edit-input {
-            display: none;
+        .edit-dropdown {
+            display: none; /* Hidden by default */
             margin-top: 10px;
         }
     </style>
@@ -199,7 +199,7 @@
                 const editButton = document.createElement('button');
                 editButton.innerText = 'Edit';
                 editButton.className = 'edit-button';
-                editButton.onclick = () => showEditTeamNamePopup(team, teamDiv);
+                editButton.onclick = () => showEditTeamNameDropdown(team, teamDiv);
                 
                 teamDiv.appendChild(editButton);
                 draftOrderContainer.appendChild(teamDiv);
@@ -215,13 +215,52 @@
             });
         }
 
-        function showEditTeamNamePopup(team, teamDiv) {
-            const newName = prompt("Enter new team name:", team.name);
-            if (newName) {
-                // Update team name
-                team.name = newName;
-                teamDiv.querySelector('.team-name').innerText = team.name; // Update displayed team name
+        function showEditTeamNameDropdown(team, teamDiv) {
+            // Remove any existing dropdown
+            const existingDropdown = teamDiv.querySelector('.edit-dropdown');
+            if (existingDropdown) {
+                existingDropdown.remove(); // Remove if it already exists
             }
+
+            // Create a dropdown
+            const dropdown = document.createElement('select');
+            dropdown.className = 'edit-dropdown';
+            dropdown.onchange = () => {
+                const selectedTeamName = dropdown.value;
+                if (selectedTeamName !== "Custom Name") {
+                    team.name = selectedTeamName; // Update team name
+                    teamDiv.querySelector('.team-name').innerText = team.name; // Update displayed team name
+                } else {
+                    const customName = prompt("Enter new team name:", team.name);
+                    if (customName) {
+                        team.name = customName;
+                        teamDiv.querySelector('.team-name').innerText = team.name; // Update displayed team name
+                    }
+                }
+            };
+
+            // Populate the dropdown with team names
+            const defaultOption = document.createElement('option');
+            defaultOption.textContent = "Select Team Name";
+            defaultOption.value = "";
+            dropdown.appendChild(defaultOption);
+
+            teams.forEach(t => {
+                const option = document.createElement('option');
+                option.value = t.name;
+                option.textContent = t.name;
+                dropdown.appendChild(option);
+            });
+
+            // Add an option for custom name
+            const customOption = document.createElement('option');
+            customOption.value = "Custom Name";
+            customOption.textContent = "Custom Name";
+            dropdown.appendChild(customOption);
+
+            // Append the dropdown to the team div
+            teamDiv.appendChild(dropdown);
+            dropdown.style.display = 'inline'; // Show dropdown
         }
 
         function toggleFilter(position) {
@@ -317,9 +356,8 @@
             players.sort((a, b) => parseInt(a.ranking) - parseInt(b.ranking)); // Show higher ranking first
         }
 
-        // Initial call to show players when the page loads
+        // Initial call to display players when the page loads
         displayPlayers(filteredPlayers); // Initial call to show players
-        // Event listeners at the bottom for clarity
         document.getElementById('updateRounds').addEventListener('click', () => {
             const numRoundsInput = document.getElementById('numRounds').value;
             numRounds = Math.max(1, Math.min(7, Number(numRoundsInput))); // Ensure it is between 1 and 7
