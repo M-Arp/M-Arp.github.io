@@ -53,7 +53,7 @@
             background-color: #e6e6e6;
             transition: background-color 0.3s;
             margin: 3px; /* Add some margin */
-            flex: 1 1 45%; /* Allow buttons to grow and take 45% width */
+            flex: 1 1 15%; /* Allow buttons to grow and take 45% width */
         }
         .filter-button.active {
             background-color: #b0b0b0; /* Different shade of grey for active buttons */
@@ -403,7 +403,7 @@
         // Event listeners at the bottom for clarity
         document.getElementById('updateRounds').addEventListener('click', () => {
             const numRoundsInput = document.getElementById('numRounds').value;
-            numRounds = Math.max(1, Math.min(7, Number(numRoundsInput))); // Ensure it is between 1 and 7
+            numRounds = Math.max(1, Math.min(257, Number(numRoundsInput))); // Ensure it is between 1 and 7
             displayDraftOrder(teams); // Re-display draft order with updated number of rounds
         });
         document.getElementById('undoPick').addEventListener('click', undoLastPick); // Bind undo functionality
