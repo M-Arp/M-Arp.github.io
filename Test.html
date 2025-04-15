@@ -380,7 +380,8 @@ function assignPlayerToDraft(player) {
                 </span>
             </div>
         `;
-        document.getElementById('draftResults').insertBefore(draftEntry, document.getElementById('draftResults').firstChild); // Insert at the top
+                // Insert draft entry at the beginning of draft results
+        document.getElementById('draftResults').insertAdjacentElement('afterbegin', draftEntry);
 
         // Record the assignment for undo functionality
         draftHistory.push({ player: { ...player }, team }); // Store a copy of the last draft entry
