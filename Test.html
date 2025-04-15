@@ -107,7 +107,7 @@
 .draft-pick {
     font-size: 1.5em; /* Bigger font size for draft pick */
     font-weight: bold; /* Bold draft pick */
-    color: #444; /* Color for draft pick */
+    color: #333; /* Color for draft pick */
     margin-right: 10px; /* Space to the right of the pick */
 }
 
@@ -374,8 +374,8 @@
 <span class="draft-pick">${team.draftOrder}</span>
 <div>
     <span class="team-name">${team.name}</span><br>
-    <span>${player.name} (Rank: ${player.ranking}) 
-        <span class="player-position">${player.position}</span>
+    <span>${player.name} |  <span class="player-position">${player.position} (#${player.ranking}) 
+       </span>
     </span>
 </div>
                 `;
