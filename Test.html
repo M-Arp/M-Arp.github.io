@@ -85,6 +85,24 @@
             font-size: 0.9em; /* Slightly smaller font for details */
             color: #555; /* Dim color for metadata */
         }
+                /* Draft results styles */
+        .draft-result {
+            margin-bottom: 10px; /* Add space between draft entries */
+            border: 1px solid #aaa; /* Optional: border for each result */
+            padding: 10px; /* Padding inside each result */
+            border-radius: 4px; /* Rounded corners */
+        }
+
+        .draft-pick {
+            font-size: 1.7em; /* Bigger font size for draft pick */
+            font-weight: bold; /* Bold draft pick */
+            color: #333; /* Color for draft pick */
+        }
+
+        .team-name {
+            font-size: 1.2em; /* Slightly bigger font for team name */
+            color: #444; /* Team name color */
+        }
     </style>
 </head>
 
@@ -335,12 +353,19 @@
         }
 
         // Assign player to current team
-        function assignPlayerToDraft(player) {
+     function assignPlayerToDraft(player) {
             if (currentDraftPick < teams.length) {
                 const team = teams[currentDraftPick]; // Get the current team
                 const draftEntry = document.createElement('div');
-                draftEntry.textContent = `${team.draftOrder}:${team.name} | ${player.name} (#${player.ranking})`;
-                draftEntry.className = 'drafted';
+                draftEntry.classList.add('draft-result'); // Add styling class
+                draftEntry.innerHTML = `
+                    <div class="draft-pick">${team.draftOrder}</div>
+                    <div class="team-name">${team.name}</div>
+                    <div>
+                        ${player.name} (Rank: ${player.ranking}) 
+                        <span class="player-position">${player.position}</span>
+                    </div>
+                `;
                 document.getElementById('draftResults').appendChild(draftEntry);
 
                 // Record the assignment for undo functionality
