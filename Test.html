@@ -60,11 +60,12 @@
             background-color: #e6e6e6;
             transition: background-color 0.3s;
             margin: 3px; /* Add some margin */
-            flex: 1 1 45%; /* Allow buttons to grow and take 45% width */
+            flex: 1 1 15%; /* Allow buttons to grow and take 45% width */
         }
 
         .filter-button.active {
-            background-color: #c2c2c2; /* Change color for active buttons */
+            background-color: #b0b0b0; /* Different shade of grey for active buttons */
+            color: white; /* Optional: Change text color when active for better contrast */
         }
 
         .edit-button {
@@ -132,8 +133,8 @@
 
     <div class="column">
         <h2>Draft Order</h2>
-        <label for="numRounds">Number of Draft Rounds:</label>
-        <input type="number" id="numRounds" min="1" max="7" value="3">
+        <label for="numRounds">Number of Draft Picks:</label>
+        <input type="number" id="numRounds" min="1" max="257" value="32">
         <button id="updateRounds">Update</button>
         <div id="draftOrder"></div>
         <button id="undoPick" style="display: none;">Undo Last Pick</button> <!-- Undo Button -->
@@ -154,7 +155,7 @@
         let players = [];
         let teams = [];
         let currentDraftPick = 0; // Track the current draft pick index
-        let numRounds = 3; // Default number of draft rounds
+        let numRounds = 32; // Default number of draft rounds
         let currentPlayerOffset = 0; // Offset for currently displayed players
         const playersPerPage = 50; // Number of players to show at once
         let filteredPlayers = []; // To hold filtered player data
@@ -223,9 +224,10 @@
                 playerName.textContent = player.name;
                 playerName.onclick = () => assignPlayerToDraft(player); // Assign player on click
                 
-                const playerPosition = document.createElement('span');
-                playerPosition.className = 'player-position';
-                playerPosition.textContent = player.position;
+                // Position & School are side by side with a '|'
+                const playerMeta = document.createElement('span');
+                playerMeta.className = 'player-meta';
+                playerMeta.textContent = `${player.position} | ${player.school}`;
 
                 const playerSchool = document.createElement('span');
                 playerSchool.className = 'player-school';
@@ -325,10 +327,14 @@
 
         function toggleFilter(position) {
             // Toggle the position in the active filters Set
+            const button = [...document.querySelectorAll('.filter-button')]
+                .find(btn => btn.textContent === position);
             if (activeFilters.has(position)) {
                 activeFilters.delete(position); // Remove the filter
+                button.classList.remove('active'); // Remove active class
             } else {
                 activeFilters.add(position); // Add the filter
+                button.classList.add('active'); // Add active class
             }
 
             currentPlayerOffset = 0; // Reset offset on filter change
@@ -421,7 +427,7 @@
         // Event listeners at the bottom for clarity
         document.getElementById('updateRounds').addEventListener('click', () => {
             const numRoundsInput = document.getElementById('numRounds').value;
-            numRounds = Math.max(1, Math.min(7, Number(numRoundsInput))); // Ensure it is between 1 and 7
+            numRounds = Math.max(1, Math.min(257, Number(numRoundsInput))); // Ensure it is between 1 and 7
             displayDraftOrder(teams); // Re-display draft order with updated number of rounds
         });
         document.getElementById('undoPick').addEventListener('click', undoLastPick); // Bind undo functionality
