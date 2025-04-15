@@ -365,10 +365,12 @@
         }
 
         // Assign player to current team
-// Assign player to current team
+// Function to assign player to current team
 function assignPlayerToDraft(player) {
     if (currentDraftPick < teams.length) {
         const team = teams[currentDraftPick]; // Get the current team
+
+        // Create draft entry element
         const draftEntry = document.createElement('div');
         draftEntry.classList.add('draft-result'); // Add styling class
         draftEntry.innerHTML = `
@@ -380,7 +382,8 @@ function assignPlayerToDraft(player) {
                 </span>
             </div>
         `;
-   // Insert draft entry at the beginning of draft results
+        
+        // Insert draft entry at the beginning of draft results
         document.getElementById('draftResults').insertAdjacentElement('afterbegin', draftEntry);
 
         // Record the assignment for undo functionality
@@ -388,9 +391,9 @@ function assignPlayerToDraft(player) {
         
         // Remove the drafted player from the pool
         players = players.filter(p => p.name !== player.name);
-        filteredPlayers = filteredPlayers.filter(p => p.name !== player.name); // Also filter from displayed players
+        filteredPlayers = filteredPlayers.filter(p => p.name !== player.name); // Also filter in displayed players
         displayPlayers(filteredPlayers); // Update player display
-        
+
         // Remove the drafted team from the draft order
         teams.splice(currentDraftPick, 1); // Remove the current team
         currentDraftPick = Math.max(0, currentDraftPick - 1); // Adjust draft pick index if needed
@@ -398,7 +401,7 @@ function assignPlayerToDraft(player) {
         
         // Move to the next draft pick, if available
         if (currentDraftPick >= teams.length) {
-            currentDraftPick = 0; // If the end of the list is reached, reset to the first team
+            currentDraftPick = 0; // Reset to the first team when the end is reached
         }
         highlightNextTeam(); // Highlight the next team
 
@@ -407,7 +410,6 @@ function assignPlayerToDraft(player) {
     }
 }
 
-// Undo the last pick
 // Undo the last pick
 function undoLastPick() {
     if (draftHistory.length > 0) {
@@ -430,10 +432,14 @@ function undoLastPick() {
         teams.unshift(team); // Reinsert the team at the start
         displayDraftOrder(teams); // Refresh draft order display
 
-        // Hide the undo button if no picks left to undo
-        if (draftHistory.length === 0) {
-            document.getElementById('undoPick').style.display = 'none';
+        // Show the undo button if there are still items in draft history
+        if (draftHistory.length > 0) {
+            document.getElementById('undoPick').style.display = 'inline-block';
+        } else {
+            document.getElementById('undoPick').style.display = 'none'; // Hide if no drafts left to undo
         }
+    } else {
+        document.getElementById('undoPick').style.display = 'none'; // Hide if no drafts left to undo
     }
 }
         // Function to sort players by ranking
