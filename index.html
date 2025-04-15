@@ -248,9 +248,19 @@
             if (currentDraftPick < teams.length) {
                 const team = teams[currentDraftPick]; // Get the current team
                 const draftEntry = document.createElement('div');
-                draftEntry.textContent = `${team.draftOrder}:${team.name} | ${player.name} (#${player.ranking})`;
+                draftEntry.textContent = `${player.name} (Rank: ${player.ranking}) assigned to ${team.name}`;
                 draftEntry.className = 'drafted';
+                draftEntry.dataset.playerName = player.name; // Store player name for editing
+                draftEntry.dataset.playerRanking = player.ranking; // Store player ranking for editing
+                draftEntry.dataset.teamName = team.name; // Store team name for editing
                 document.getElementById('draftResults').appendChild(draftEntry);
+
+                // Add an edit button to the drafted entry
+                const editButton = document.createElement('button');
+                editButton.innerText = 'Edit';
+                editButton.className = 'edit-button';
+                editButton.onclick = () => editDraftPick(draftEntry, team); // Call edit function with draftEntry and team
+                draftEntry.appendChild(editButton);
 
                 // Record the assignment for undo functionality
                 draftHistory.push({ player: { ...player }, team }); // Store a copy of the last draft entry
@@ -275,7 +285,8 @@
                 document.getElementById('undoPick').style.display = 'inline-block';
             }
         }
-       // Edit draft pick functionality
+
+        // Edit draft pick functionality
         function editDraftPick(draftEntry, oldTeam) {
             const playerName = draftEntry.dataset.playerName; // Get the stored player name
             const teamSelect = document.createElement('select');
@@ -314,6 +325,7 @@
             draftEntry.appendChild(teamSelect); // Add the team dropdown
             draftEntry.appendChild(confirmButton); // Add the confirm button
         }
+
         // Undo the last pick
         function undoLastPick() {
             if (draftHistory.length > 0) {
@@ -346,9 +358,8 @@
             players.sort((a, b) => parseInt(a.ranking) - parseInt(b.ranking)); // Show higher ranking first
         }
 
-        // Initial call to show players when the page loads
+        // Initial call to display players when the page loads
         displayPlayers(filteredPlayers); // Initial call to show players
-        // Event listeners at the bottom for clarity
         document.getElementById('updateRounds').addEventListener('click', () => {
             const numRoundsInput = document.getElementById('numRounds').value;
             numRounds = Math.max(1, Math.min(7, Number(numRoundsInput))); // Ensure it is between 1 and 7
