@@ -358,10 +358,9 @@
                 const draftEntry = document.createElement('div');
                 draftEntry.classList.add('draft-result'); // Add styling class
                 draftEntry.innerHTML = `
-                    <div class="draft-pick">${team.draftOrder}</div>
-                    <div class="team-name">${team.name}</div>
-                    <div>
-                        ${player.name} (Rank: ${player.ranking}) 
+                      <span class="draft-pick">${team.draftOrder}</span>
+                    <span class="team-name">${team.name}</span>
+                    <div>${player.name} (Rank: ${player.ranking}) 
                         <span class="player-position">${player.position}</span>
                     </div>
                 `;
