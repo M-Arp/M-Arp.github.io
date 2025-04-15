@@ -37,7 +37,6 @@
         }
         .drafted {
             background-color: #f0f0f0;
-            text-decoration: line-through;
         }
         .filter-buttons {
             display: flex;
@@ -53,7 +52,7 @@
             background-color: #e6e6e6;
             transition: background-color 0.3s;
             margin: 3px; /* Add some margin */
-            flex: 1 1 45%; /* Allow buttons to grow and take 45% width */
+            flex: 1 1 15%; /* Allow buttons to grow and take 45% width */
         }
         .filter-button.active {
             background-color: #b0b0b0; /* Different shade of grey for active buttons */
@@ -65,7 +64,7 @@
         }
         .player-name {
             cursor: pointer;
-            color: blue;
+            color: black;
             text-decoration: underline;
         }
         .prospect-content {
@@ -74,7 +73,7 @@
             margin-bottom: 5px; /* Space between content */
         }
         .player-ranking {
-            font-size: 1.5em; /* Bigger font size for ranking */
+            font-size: 1.3em; /* Bigger font size for ranking */
             font-weight: bold; /* Bold ranking */
             margin-right: 10px; /* Space between ranking and name */
         }
@@ -86,30 +85,36 @@
             font-size: 0.9em; /* Slightly smaller font for details */
             color: #555; /* Dim color for metadata */
         }
-        
-        /* Draft results styles */
-        .draft-result {
-            margin-bottom: 10px; /* Add space between draft entries */
-            border: 1px solid #aaa; /* Optional: border for each result */
-            padding: 10px; /* Padding inside each result */
-            border-radius: 4px; /* Rounded corners */
-            display: flex; /* Use flex to align elements */
-            align-items: flex-start; /* Align items to the top */
-        }
+                /* Draft results styles */
+.draft-result {
+    margin-bottom: 10px; /* Add space between draft entries */
+    border: 1px solid #aaa; /* Optional: border for each result */
+    padding: 10px; /* Padding inside each result */
+    border-radius: 4px; /* Rounded corners */
+    display: flex; /* Flex to align pick, team, and player info */
+    align-items: center; /* Center align items vertically */
+}
 
-        .draft-pick {
-            font-size: 1.7em; /* Bigger font size for draft pick */
-            font-weight: bold; /* Bold draft pick */
-            color: #333; /* Color for draft pick */
-            margin-right: 10px; /* Space to the right of the pick */
-        }
+.draft-result {
+    margin-bottom: 10px; /* Add space between draft entries */
+    border: 1px solid #aaa; /* Optional: border for each result */
+    padding: 10px; /* Padding inside each result */
+    border-radius: 4px; /* Rounded corners */
+    display: flex; /* Flex to align pick, team, and player info */
+    align-items: center; /* Center align items vertically */
+}
 
-        .team-name {
-            font-size: 1.2em; /* Slightly bigger font for team name */
-            color: #444; /* Team name color */
-            margin-bottom: 5px; /* Space below team name */
-            display: block; /* Block level to stack with player info */
-        }
+.draft-pick {
+    font-size: 1.3em; /* Bigger font size for draft pick */
+    font-weight: bold; /* Bold draft pick */
+    color: #333; /* Color for draft pick */
+    margin-right: 10px; /* Space to the right of the pick */
+}
+
+.team-name {
+    color: #333; /* Team name color */
+    margin-right: 10px; /* Space to separate team name from player info */
+}
     </style>
 </head>
 
