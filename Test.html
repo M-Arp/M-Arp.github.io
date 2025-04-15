@@ -365,19 +365,19 @@
         }
 
         // Assign player to current team
-     function assignPlayerToDraft(player) {
+       function assignPlayerToDraft(player) {
             if (currentDraftPick < teams.length) {
                 const team = teams[currentDraftPick]; // Get the current team
                 const draftEntry = document.createElement('div');
                 draftEntry.classList.add('draft-result'); // Add styling class
                 draftEntry.innerHTML = `
-<span class="draft-pick">${team.draftOrder}</span>
-<div>
-    <span class="team-name">${team.name}</span><br>
-    <span>${player.name} |  <span class="player-position">${player.position} (#${player.ranking}) 
-       </span>
-    </span>
-</div>
+                    <span class="draft-pick">${team.draftOrder}</span>
+                    <div>
+                        <span class="team-name">${team.name}</span><br>
+                        <span>${player.name} (Rank: ${player.ranking}) 
+                            <span class="player-position">${player.position}</span>
+                        </span>
+                    </div>
                 `;
                 document.getElementById('draftResults').insertBefore(draftEntry, document.getElementById('draftResults').firstChild); // Insert at the top
 
