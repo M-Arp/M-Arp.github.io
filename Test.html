@@ -380,7 +380,7 @@ function assignPlayerToDraft(player) {
                 </span>
             </div>
         `;
-                // Insert draft entry at the beginning of draft results
+   // Insert draft entry at the beginning of draft results
         document.getElementById('draftResults').insertAdjacentElement('afterbegin', draftEntry);
 
         // Record the assignment for undo functionality
@@ -408,12 +408,19 @@ function assignPlayerToDraft(player) {
 }
 
 // Undo the last pick
+// Undo the last pick
 function undoLastPick() {
     if (draftHistory.length > 0) {
         const lastDraft = draftHistory.pop(); // Get the last drafted player and team
         const { player, team } = lastDraft;
 
-        // Add the player back to the pool
+        // Remove the corresponding draft entry from the draft results
+        const draftResultsContainer = document.getElementById('draftResults');
+        if (draftResultsContainer.lastChild) {
+            draftResultsContainer.removeChild(draftResultsContainer.lastChild); // Remove the last drafted entry
+        }
+
+        // Add the player back to the player pool
         players.push(player); // Restore the player to the players pool
         filteredPlayers = [...players]; // Reset filtered players to include the newly restored player
         sortPlayersByRanking(); // Sort players by ranking
@@ -422,10 +429,6 @@ function undoLastPick() {
         // Add the team back to the draft order
         teams.unshift(team); // Reinsert the team at the start
         displayDraftOrder(teams); // Refresh draft order display
-
-        // Remove from drafted results
-        const draftResultsContainer = document.getElementById('draftResults');
-        draftResultsContainer.removeChild(draftResultsContainer.lastChild); // Remove the last drafted entry
 
         // Hide the undo button if no picks left to undo
         if (draftHistory.length === 0) {
