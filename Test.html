@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFL Mock Draft Builder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: space-around;
+            margin: 20px;
+        }
+
+        .column {
+            width: 30%;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .prospect,
+        .team,
+        .drafted {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #e0e0e0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: background-color 0.3s; /* Add transition for hover effects */
+        }
+
+        .prospect:hover {
+            background-color: #d4d4d4; /* Change background on hover */
+        }
+
+        .drafted {
+            background-color: #f0f0f0;
+            text-decoration: line-through;
+        }
+
+        .filter-buttons {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap; /* Wrap buttons on smaller screens */
+            margin-bottom: 10px;
+        }
+
+        .filter-button {
+            padding: 5px 10px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #e6e6e6;
+            transition: background-color 0.3s;
+            margin: 3px; /* Add some margin */
+            flex: 1 1 45%; /* Allow buttons to grow and take 45% width */
+        }
+
+        .filter-button.active {
+            background-color: #c2c2c2; /* Change color for active buttons */
+        }
+
+        .edit-button {
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .player-name {
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
+        }
+
+        .prospect-content {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px; /* Space between content */
+        }
+
+        .player-ranking {
+            font-size: 1.5em; /* Bigger font size for ranking */
+            font-weight: bold; /* Bold ranking */
+            margin-right: 10px; /* Space between ranking and name */
+        }
+
+        .player-details {
+            display: flex;
+            flex-direction: column; /* Stack position and school vertically */
+        }
+
+        .player-position,
+        .player-school {
+            font-size: 0.9em; /* Slightly smaller font for details */
+            color: #555; /* Dim color for position and school */
+        }
+
+        .edit-dropdown {
+            display: none; /* Hidden by default */
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="column">
+        <h2>Player Pool</h2>
+        <div class="filter-buttons">
+            <button class="filter-button" onclick="toggleFilter('QB')">QB</button>
+            <button class="filter-button" onclick="toggleFilter('RB')">RB</button>
+            <button class="filter-button" onclick="toggleFilter('TE')">TE</button>
+            <button class="filter-button" onclick="toggleFilter('OT')">OT</button>
+            <button class="filter-button" onclick="toggleFilter('IOL')">IOL</button>
+            <button class="filter-button" onclick="toggleFilter('WR')">WR</button>
+            <button class="filter-button" onclick="toggleFilter('CB')">CB</button>
+            <button class="filter-button" onclick="toggleFilter('DT')">DT</button>
+            <button class="filter-button" onclick="toggleFilter('EDGE')">EDGE</button>
+            <button class="filter-button" onclick="toggleFilter('LB')">LB</button>
+            <button class="filter-button" onclick="toggleFilter('S')">S</button>
+            <button class="filter-button" onclick="toggleFilter('ST')">ST</button>
+            <button class="filter-button" onclick="resetFilter()">All</button> <!-- Reset button -->
+        </div>
+        <div id="players"></div>  <!-- Player display -->
+    </div>
+
+    <div class="column">
+        <h2>Draft Order</h2>
+        <label for="numRounds">Number of Draft Rounds:</label>
+        <input type="number" id="numRounds" min="1" max="7" value="3">
+        <button id="updateRounds">Update</button>
+        <div id="draftOrder"></div>
+        <button id="undoPick" style="display: none;">Undo Last Pick</button> <!-- Undo Button -->
+    </div>
+
+    <div class="column">
+        <h2>Draft Results</h2>
+        <div id="draftResults"></div>
+    </div>
+
+    <script>
+       const playersSheetId = '1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY'; // Replace with your Players Google Sheet ID
+        const teamsSheetId = '1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0'; // Replace with your Teams Google Sheet ID
+
+        const playersUrl = `https://docs.google.com/spreadsheets/d/1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY/gviz/tq?tqx=out:json`;
+        const teamsUrl = `https://docs.google.com/spreadsheets/d/1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0/gviz/tq?tqx=out:json`;
+
+        let players = [];
+        let teams = [];
+        let currentDraftPick = 0; // Track the current draft pick index
+        let numRounds = 3; // Default number of draft rounds
+        let currentPlayerOffset = 0; // Offset for currently displayed players
+        const playersPerPage = 50; // Number of players to show at once
+        let filteredPlayers = []; // To hold filtered player data
+        let activeFilters = new Set(); // Set to track active filters
+        let draftHistory = []; // Array to keep track of assigned players for undo functionality
+
+        // Fetch players
+        fetch(playersUrl)
+            .then(response => response.text())
+            .then(data => {
+                const jsonData = JSON.parse(data.substr(47).slice(0, -2));
+                players = jsonData.table.rows.map(row => ({
+                    name: row.c[5]?.v,      // Player name
+                    position: row.c[6]?.v,  // Player position
+                    school: row.c[8]?.v,    // Player school
+                    ranking: row.c[0]?.v     // Player ranking
+                }));
+                filteredPlayers = players; // Initialize filtered players
+                displayPlayers(filteredPlayers);
+            })
+            .catch(error => console.error('Error fetching player data:', error));
+
+        // Fetch teams
+        fetch(teamsUrl)
+            .then(response => response.text())
+            .then(data => {
+                const jsonData = JSON.parse(data.substr(47).slice(0, -2));
+                teams = jsonData.table.rows.map(row => ({
+                    name: row.c[2]?.v,      // Team name
+                    logo: row.c[3]?.v,      // Team logo URL
+                    draftOrder: row.c[1]?.v // Draft order
+                }));
+                displayDraftOrder(teams);
+            })
+            .catch(error => console.error('Error fetching team data:', error));
+
+        function displayPlayers(players) {
+            const playersContainer = document.getElementById('players');
+            playersContainer.innerHTML = ''; // Clear existing players
+
+            // Only add players that fall within the currentPlayerOffset range
+            const start = currentPlayerOffset * playersPerPage;
+            const end = Math.min(start + playersPerPage, players.length);
+
+            // Check if we have players to show
+            for (let i = start; i < end; i++) {
+                const player = players[i];
+                const playerDiv = document.createElement('div');
+                playerDiv.className = 'prospect';
+
+                // Player content container
+                const prospectContent = document.createElement('div');
+                prospectContent.className = 'prospect-content';
+
+                // Ranking
+                const playerRanking = document.createElement('div');
+                playerRanking.className = 'player-ranking';
+                playerRanking.textContent = player.ranking;
+
+                // Player details
+                const playerDetails = document.createElement('div');
+                playerDetails.className = 'player-details';
+
+                const playerName = document.createElement('span');
+                playerName.className = 'player-name';
+                playerName.textContent = player.name;
+                playerName.onclick = () => assignPlayerToDraft(player); // Assign player on click
+                
+                const playerPosition = document.createElement('span');
+                playerPosition.className = 'player-position';
+                playerPosition.textContent = player.position;
+
+                const playerSchool = document.createElement('span');
+                playerSchool.className = 'player-school';
+                playerSchool.textContent = player.school;
+
+                // Append details
+                playerDetails.appendChild(playerName);
+                playerDetails.appendChild(playerPosition);
+                playerDetails.appendChild(playerSchool);
+
+                // Append ranking and details to main container
+                prospectContent.appendChild(playerRanking);
+                prospectContent.appendChild(playerDetails);
+                playerDiv.appendChild(prospectContent);
+                playersContainer.appendChild(playerDiv);
+            }
+        }
+
+        function displayDraftOrder(teams) {
+            const draftOrderContainer = document.getElementById('draftOrder');
+            draftOrderContainer.innerHTML = ''; // Clear existing teams
+
+            // Show only the specified number of rounds
+            for (let i = 0; i < Math.min(numRounds, teams.length); i++) {
+                const team = teams[i];
+                const teamDiv = document.createElement('div');
+                teamDiv.className = 'team';
+                teamDiv.innerHTML = `${team.draftOrder}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">`;
+                
+                // Add Edit button for each team
+                const editButton = document.createElement('button');
+                editButton.innerText = 'Edit';
+                editButton.className = 'edit-button';
+                editButton.onclick = () => showEditTeamNameDropdown(team, teamDiv);
+                
+                teamDiv.appendChild(editButton);
+                draftOrderContainer.appendChild(teamDiv);
+            }
+            // Automatically highlight next team for picking
+            highlightNextTeam();
+        }
+
+        function highlightNextTeam() {
+            const teamDivs = document.querySelectorAll('.team');
+            teamDivs.forEach((div, index) => {
+                div.style.fontWeight = (index === currentDraftPick) ? 'bold' : 'normal'; // Bold the current draft pick
+            });
+        }
+
+        function showEditTeamNameDropdown(team, teamDiv) {
+            // Remove any existing dropdown
+            const existingDropdown = teamDiv.querySelector('.edit-dropdown');
+            if (existingDropdown) {
+                existingDropdown.remove(); // Remove if it already exists
+            }
+
+            // Create a dropdown
+            const dropdown = document.createElement('select');
+            dropdown.className = 'edit-dropdown';
+            dropdown.onchange = () => {
+                const selectedTeamName = dropdown.value;
+                if (selectedTeamName !== "Custom Name") {
+                    team.name = selectedTeamName; // Update team name
+                    teamDiv.querySelector('.team-name').innerText = team.name; // Update displayed team name
+                } else {
+                    const customName = prompt("Enter new team name:", team.name);
+                    if (customName) {
+                        team.name = customName;
+                        teamDiv.querySelector('.team-name').innerText = team.name; // Update displayed team name
+                    }
+                }
+            };
+
+            // Populate the dropdown with team names
+            const defaultOption = document.createElement('option');
+            defaultOption.textContent = "Select Team Name";
+            defaultOption.value = "";
+            dropdown.appendChild(defaultOption);
+
+            teams.forEach(t => {
+                const option = document.createElement('option');
+                option.value = t.name;
+                option.textContent = t.name;
+                dropdown.appendChild(option);
+            });
+
+            // Add an option for custom name
+            const customOption = document.createElement('option');
+            customOption.value = "Custom Name";
+            customOption.textContent = "Custom Name";
+            dropdown.appendChild(customOption);
+
+            // Append the dropdown to the team div
+            teamDiv.appendChild(dropdown);
+            dropdown.style.display = 'inline'; // Show dropdown
+        }
+
+        function toggleFilter(position) {
+            // Toggle the position in the active filters Set
+            if (activeFilters.has(position)) {
+                activeFilters.delete(position); // Remove the filter
+            } else {
+                activeFilters.add(position); // Add the filter
+            }
+
+            currentPlayerOffset = 0; // Reset offset on filter change
+            applyFilters(); // Apply filters to the player list
+        }
+
+        function applyFilters() {
+            if (activeFilters.size > 0) {
+                filteredPlayers = players.filter(player => activeFilters.has(player.position));
+            } else {
+                filteredPlayers = players; // Reset filtered players to original if no filters are active
+            }
+            displayPlayers(filteredPlayers); // Display players based on current filters
+        }
+
+        function resetFilter() {
+            activeFilters.clear(); // Clear all active filters
+            currentPlayerOffset = 0; // Reset offset
+            filteredPlayers = players; // Reset filtered players to original
+            displayPlayers(filteredPlayers); // Display all players
+        }
+
+        // Assign player to current team
+        function assignPlayerToDraft(player) {
+            if (currentDraftPick < teams.length) {
+                const team = teams[currentDraftPick]; // Get the current team
+                const draftEntry = document.createElement('div');
+                draftEntry.textContent = `${player.name} (Rank: ${player.ranking}) assigned to ${team.name}`;
+                draftEntry.className = 'drafted';
+                document.getElementById('draftResults').appendChild(draftEntry);
+
+                // Record the assignment for undo functionality
+                draftHistory.push({ player: { ...player }, team }); // Store a copy of the last draft entry
+                
+                // Remove the drafted player from the pool
+                players = players.filter(p => p.name !== player.name);
+                filteredPlayers = filteredPlayers.filter(p => p.name !== player.name); // Also filter from displayed players
+                displayPlayers(filteredPlayers); // Update player display
+                
+                // Remove the drafted team from the draft order
+                teams.splice(currentDraftPick, 1); // Remove the current team
+                currentDraftPick = Math.max(0, currentDraftPick - 1); // Adjust draft pick index if needed
+                displayDraftOrder(teams); // Update draft order display
+                
+                // Move to the next draft pick, if available
+                if (currentDraftPick >= teams.length) {
+                    currentDraftPick = 0; // If the end of the list is reached, reset to the first team
+                }
+                highlightNextTeam(); // Highlight the next team
+
+                // Show the undo button
+                document.getElementById('undoPick').style.display = 'inline-block';
+            }
+        }
+
+        // Undo the last pick
+        function undoLastPick() {
+            if (draftHistory.length > 0) {
+                const lastDraft = draftHistory.pop(); // Get the last drafted player and team
+                const { player, team } = lastDraft;
+
+                // Add the player back to the pool
+                players.push(player); // Restore the player to the players pool
+                filteredPlayers = [...players]; // Reset filtered players to include the newly restored player
+                sortPlayersByRanking(); // Sort players by ranking
+                displayPlayers(filteredPlayers); // Update the display
+
+                // Add the team back to the draft order
+                teams.unshift(team); // Reinsert the team at the start
+                displayDraftOrder(teams); // Refresh draft order display
+
+                // Remove from drafted results
+                const draftResultsContainer = document.getElementById('draftResults');
+                draftResultsContainer.removeChild(draftResultsContainer.lastChild); // Remove the last drafted entry
+
+                // Hide the undo button if no picks left to undo
+                if (draftHistory.length === 0) {
+                    document.getElementById('undoPick').style.display = 'none';
+                }
+            }
+        }
+
+        // Function to sort players by ranking
+        function sortPlayersByRanking() {
+            players.sort((a, b) => parseInt(a.ranking) - parseInt(b.ranking)); // Show higher ranking first
+        }
+
+        // Initial call to display players when the page loads
+        displayPlayers(filteredPlayers); // Initial call to show players
+        // Event listeners at the bottom for clarity
+        document.getElementById('updateRounds').addEventListener('click', () => {
+            const numRoundsInput = document.getElementById('numRounds').value;
+            numRounds = Math.max(1, Math.min(7, Number(numRoundsInput))); // Ensure it is between 1 and 7
+            displayDraftOrder(teams); // Re-display draft order with updated number of rounds
+        });
+        document.getElementById('undoPick').addEventListener('click', undoLastPick); // Bind undo functionality
+        
+    </script>
+</body>
+
+</html>
