@@ -12,7 +12,6 @@
             justify-content: space-around;
             margin: 20px;
         }
-
         .column {
             width: 30%;
             padding: 20px;
@@ -20,11 +19,9 @@
             border-radius: 6px;
             background-color: #f9f9f9;
         }
-
         h2 {
             text-align: center;
         }
-
         .prospect,
         .team,
         .drafted {
@@ -35,23 +32,19 @@
             border-radius: 4px;
             transition: background-color 0.3s; /* Add transition for hover effects */
         }
-
         .prospect:hover {
             background-color: #d4d4d4; /* Change background on hover */
         }
-
         .drafted {
             background-color: #f0f0f0;
             text-decoration: line-through;
         }
-
         .filter-buttons {
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap; /* Wrap buttons on smaller screens */
             margin-bottom: 10px;
         }
-
         .filter-button {
             padding: 5px 10px;
             cursor: pointer;
@@ -60,50 +53,38 @@
             background-color: #e6e6e6;
             transition: background-color 0.3s;
             margin: 3px; /* Add some margin */
-            flex: 1 1 15%; /* Allow buttons to grow and take 45% width */
+            flex: 1 1 45%; /* Allow buttons to grow and take 45% width */
         }
-
         .filter-button.active {
             background-color: #b0b0b0; /* Different shade of grey for active buttons */
             color: white; /* Optional: Change text color when active for better contrast */
         }
-
         .edit-button {
             margin-left: 10px;
             cursor: pointer;
         }
-
         .player-name {
             cursor: pointer;
             color: blue;
             text-decoration: underline;
         }
-
         .prospect-content {
             display: flex;
             align-items: center;
             margin-bottom: 5px; /* Space between content */
         }
-
         .player-ranking {
             font-size: 1.5em; /* Bigger font size for ranking */
             font-weight: bold; /* Bold ranking */
             margin-right: 10px; /* Space between ranking and name */
         }
-
         .player-details {
             display: flex;
-            flex-direction: column; /* Stack position and school vertically */
+            flex-direction: column; /* Stack name vertically */
         }
-
         .player-meta {
             font-size: 0.9em; /* Slightly smaller font for details */
             color: #555; /* Dim color for metadata */
-        }
-
-        .edit-dropdown {
-            display: none; /* Hidden by default */
-            margin-top: 10px;
         }
     </style>
 </head>
@@ -229,14 +210,9 @@
                 playerMeta.className = 'player-meta';
                 playerMeta.textContent = `${player.position} | ${player.school}`;
 
-                const playerSchool = document.createElement('span');
-                playerSchool.className = 'player-school';
-                playerSchool.textContent = player.school;
-
-                // Append details
+                // Append the player name and meta information
                 playerDetails.appendChild(playerName);
-                playerDetails.appendChild(playerPosition);
-                playerDetails.appendChild(playerSchool);
+                playerDetails.appendChild(playerMeta);
 
                 // Append ranking and details to main container
                 prospectContent.appendChild(playerRanking);
@@ -427,7 +403,7 @@
         // Event listeners at the bottom for clarity
         document.getElementById('updateRounds').addEventListener('click', () => {
             const numRoundsInput = document.getElementById('numRounds').value;
-            numRounds = Math.max(1, Math.min(257, Number(numRoundsInput))); // Ensure it is between 1 and 7
+            numRounds = Math.max(1, Math.min(7, Number(numRoundsInput))); // Ensure it is between 1 and 7
             displayDraftOrder(teams); // Re-display draft order with updated number of rounds
         });
         document.getElementById('undoPick').addEventListener('click', undoLastPick); // Bind undo functionality
