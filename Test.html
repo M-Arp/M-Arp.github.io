@@ -95,15 +95,23 @@
     align-items: center; /* Center align items vertically */
 }
 
+.draft-result {
+    margin-bottom: 10px; /* Add space between draft entries */
+    border: 1px solid #aaa; /* Optional: border for each result */
+    padding: 10px; /* Padding inside each result */
+    border-radius: 4px; /* Rounded corners */
+    display: flex; /* Flex to align pick, team, and player info */
+    align-items: center; /* Center align items vertically */
+}
+
 .draft-pick {
-    font-size: 1.7em; /* Bigger font size for draft pick */
+    font-size: 1.5em; /* Bigger font size for draft pick */
     font-weight: bold; /* Bold draft pick */
     color: #333; /* Color for draft pick */
     margin-right: 10px; /* Space to the right of the pick */
 }
 
 .team-name {
-    font-size: 1.2em; /* Slightly bigger font for team name */
     color: #444; /* Team name color */
     margin-right: 10px; /* Space to separate team name from player info */
 }
@@ -363,11 +371,13 @@
                 const draftEntry = document.createElement('div');
                 draftEntry.classList.add('draft-result'); // Add styling class
                 draftEntry.innerHTML = `
-                      <span class="draft-pick">${team.draftOrder}</span>
-                    <span class="team-name">${team.name}</span>
-                    <div>${player.name} (Rank: ${player.ranking}) 
-                        <span class="player-position">${player.position}</span>
-                    </div>
+<span class="draft-pick">${team.draftOrder}</span>
+<div>
+    <span class="team-name">${team.name}</span><br>
+    <span>${player.name} (Rank: ${player.ranking}) 
+        <span class="player-position">${player.position}</span>
+    </span>
+</div>
                 `;
                 document.getElementById('draftResults').appendChild(draftEntry);
 
