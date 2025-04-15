@@ -62,6 +62,10 @@
             cursor: pointer;
             color: black;
         }
+            .edit-input {
+            display: none;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -195,7 +199,7 @@
                 const editButton = document.createElement('button');
                 editButton.innerText = 'Edit';
                 editButton.className = 'edit-button';
-                editButton.onclick = () => editTeamName(team, teamDiv);
+                editButton.onclick = () => showEditTeamNamePopup(team, teamDiv);
                 
                 teamDiv.appendChild(editButton);
                 draftOrderContainer.appendChild(teamDiv);
@@ -209,6 +213,15 @@
             teamDivs.forEach((div, index) => {
                 div.style.fontWeight = (index === currentDraftPick) ? 'bold' : 'normal'; // Bold the current draft pick
             });
+        }
+
+        function showEditTeamNamePopup(team, teamDiv) {
+            const newName = prompt("Enter new team name:", team.name);
+            if (newName) {
+                // Update team name
+                team.name = newName;
+                teamDiv.querySelector('.team-name').innerText = team.name; // Update displayed team name
+            }
         }
 
         function toggleFilter(position) {
@@ -244,7 +257,7 @@
             if (currentDraftPick < teams.length) {
                 const team = teams[currentDraftPick]; // Get the current team
                 const draftEntry = document.createElement('div');
-                draftEntry.textContent = `${team.draftOrder}:${team.name} | ${player.name} (#${player.ranking})`;
+                draftEntry.textContent = `${player.name} (Rank: ${player.ranking}) assigned to ${team.name}`;
                 draftEntry.className = 'drafted';
                 document.getElementById('draftResults').appendChild(draftEntry);
 
@@ -260,7 +273,7 @@
                 teams.splice(currentDraftPick, 1); // Remove the current team
                 currentDraftPick = Math.max(0, currentDraftPick - 1); // Adjust draft pick index if needed
                 displayDraftOrder(teams); // Update draft order display
-
+                
                 // Move to the next draft pick, if available
                 if (currentDraftPick >= teams.length) {
                     currentDraftPick = 0; // If the end of the list is reached, reset to the first team
