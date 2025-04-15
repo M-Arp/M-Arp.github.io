@@ -155,8 +155,6 @@
     <div id="draftResults"></div>
 </div>
 
-    </div>
-
     <script>
        const playersSheetId = '1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY'; // Replace with your Players Google Sheet ID
         const teamsSheetId = '1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0'; // Replace with your Teams Google Sheet ID
@@ -374,10 +372,11 @@ function assignPlayerToDraft(player) {
         draftEntry.innerHTML = `
             <span class="draft-pick">${team.draftOrder}</span>
             <div>
-                <span class="team-name">${team.name}</span><br>
-                <span>${player.name} (Rank: ${player.ranking}) 
-                    <span class="player-position">${player.position}</span>
-                </span>
+<span class="draft-pick">${team.draftOrder}</span>
+<div>
+    <span class="team-name">${team.name}</span><br>
+    <span>${player.name} |  <span class="player-position">${player.position} (#${player.ranking}) 
+       </span>
             </div>
         `;
         
