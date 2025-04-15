@@ -377,6 +377,8 @@ function assignPlayerToDraft(player) {
        </span>
             </div>
         `;
+                // Make the entire draft entry clickable
+        draftEntry.onclick = () => assignPlayerToDraft(player);
         
         // Insert draft entry at the beginning of draft results
         document.getElementById('draftResults').insertAdjacentElement('afterbegin', draftEntry);
