@@ -406,31 +406,33 @@
         }
 
         // Undo the last pick
-        function undoLastPick() {
-            if (draftHistory.length > 0) {
-                const lastDraft = draftHistory.pop(); // Get the last drafted player and team
-                const { player, team } = lastDraft;
+  function undoLastPick() {
+    if (draftHistory.length > 0) {
+        const lastDraft = draftHistory.pop(); // Get the last drafted player and team
+        const { player, team } = lastDraft;
 
-                // Add the player back to the pool
-                players.push(player); // Restore the player to the players pool
-                filteredPlayers = [...players]; // Reset filtered players to include the newly restored player
-                sortPlayersByRanking(); // Sort players by ranking
-                displayPlayers(filteredPlayers); // Update the display
+        // Add the player back to the pool
+        players.push(player); // Restore the player to the players pool
+        filteredPlayers = [...players]; // Reset filtered players to include the newly restored player
+        sortPlayersByRanking(); // Sort players by ranking
+        displayPlayers(filteredPlayers); // Update the display
 
-                // Add the team back to the draft order
-                teams.unshift(team); // Reinsert the team at the start
-                displayDraftOrder(teams); // Refresh draft order display
+        // Add the team back to the draft order
+        teams.unshift(team); // Reinsert the team at the start
 
-                // Remove from drafted results
-                const draftResultsContainer = document.getElementById('draftResults');
-                draftResultsContainer.removeChild(draftResultsContainer.lastChild); // Remove the last drafted entry
+        // Refresh draft order display to reflect the added team
+        displayDraftOrder(teams); 
 
-                // Hide the undo button if no picks left to undo
-                if (draftHistory.length === 0) {
-                    document.getElementById('undoPick').style.display = 'none';
-                }
-            }
+        // Remove from drafted results
+        const draftResultsContainer = document.getElementById('draftResults');
+        draftResultsContainer.removeChild(draftResultsContainer.lastChild); // Remove the last drafted entry
+
+        // Hide the undo button if no picks left to undo
+        if (draftHistory.length === 0) {
+            document.getElementById('undoPick').style.display = 'none';
         }
+    }
+}
 
         // Function to sort players by ranking
         function sortPlayersByRanking() {
