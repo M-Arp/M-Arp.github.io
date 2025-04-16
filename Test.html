@@ -196,7 +196,8 @@
                 teams = jsonData.table.rows.map(row => ({
                     name: row.c[2]?.v,      // Team name
                     logo: row.c[3]?.v,      // Team logo URL
-                    draftOrder: row.c[1]?.v // Draft order
+                    draftOrder: row.c[1]?.v, // Draft order
+                    needs: row.c[3]?.v // Team needs (assuming it's stored in the 4th column)
                 }));
                 displayDraftOrder(teams);
             })
@@ -251,29 +252,32 @@
             }
         }
 
-        function displayDraftOrder(teams) {
-            const draftOrderContainer = document.getElementById('draftOrder');
-            draftOrderContainer.innerHTML = ''; // Clear existing teams
+       function displayDraftOrder(teams) {
+    const draftOrderContainer = document.getElementById('draftOrder');
+    draftOrderContainer.innerHTML = ''; // Clear existing teams
 
-            // Show only the specified number of rounds
-            for (let i = 0; i < Math.min(numRounds, teams.length); i++) {
-                const team = teams[i];
-                const teamDiv = document.createElement('div');
-                teamDiv.className = 'team';
-                teamDiv.innerHTML = `${team.draftOrder}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">`;
-                
-                // Add Edit button for each team
-                const editButton = document.createElement('button');
-                editButton.innerText = 'Edit';
-                editButton.className = 'edit-button';
-                editButton.onclick = () => showEditTeamNameDropdown(team, teamDiv);
-                
-                teamDiv.appendChild(editButton);
-                draftOrderContainer.appendChild(teamDiv);
-            }
-            // Automatically highlight next team for picking
-            highlightNextTeam();
-        }
+    // Show only the specified number of rounds
+    for (let i = 0; i < Math.min(numRounds, teams.length); i++) {
+        const team = teams[i];
+        const teamDiv = document.createElement('div');
+        teamDiv.className = 'team';
+        teamDiv.innerHTML = `
+            ${team.draftOrder}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">
+            <div class="team-needs">Needs: ${team.needs}</div> <!-- Display team needs -->
+        `;
+        
+        // Add Edit button for each team
+        const editButton = document.createElement('button');
+        editButton.innerText = 'Edit';
+        editButton.className = 'edit-button';
+        editButton.onclick = () => showEditTeamNameDropdown(team, teamDiv);
+        
+        teamDiv.appendChild(editButton);
+        draftOrderContainer.appendChild(teamDiv);
+    }
+    // Automatically highlight next team for picking
+    highlightNextTeam();
+}
 
         function highlightNextTeam() {
             const teamDivs = document.querySelectorAll('.team');
