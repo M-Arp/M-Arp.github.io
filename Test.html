@@ -115,6 +115,12 @@
     color: #333; /* Team name color */
     margin-right: 10px; /* Space to separate team name from player info */
 }
+.team-needs {
+    font-size: 0.9em; /* Slightly smaller font for team needs */
+    color: #555;      /* Dim color for team needs */
+    margin-top: 5px; /* Spacing above the needs */
+}
+        
     </style>
 </head>
 
@@ -197,7 +203,7 @@
                     name: row.c[2]?.v,      // Team name
                     logo: row.c[3]?.v,      // Team logo URL
                     draftOrder: row.c[1]?.v // Draft order
-                    needs: row.c[5]?.v      // Team needs (new column)
+                     needs: row.c[5]?.v      // Team needs
                 }));
                 displayDraftOrder(teams);
             })
@@ -252,7 +258,7 @@
             }
         }
 
-       function displayDraftOrder(teams) {
+function displayDraftOrder(teams) {
     const draftOrderContainer = document.getElementById('draftOrder');
     draftOrderContainer.innerHTML = ''; // Clear existing teams
 
@@ -263,7 +269,7 @@
         teamDiv.className = 'team';
         teamDiv.innerHTML = `
             ${team.draftOrder}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">
-            <div class="team-needs">${team.needs}</div> <!-- Display team needs -->
+            <div class="team-needs">${team.needs}</div>
         `;
 
         // Add Edit button for each team
@@ -271,7 +277,7 @@
         editButton.innerText = 'Edit';
         editButton.className = 'edit-button';
         editButton.onclick = () => showEditTeamNameDropdown(team, teamDiv);
-
+        
         teamDiv.appendChild(editButton);
         draftOrderContainer.appendChild(teamDiv);
     }
