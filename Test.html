@@ -115,6 +115,11 @@
     color: #333; /* Team name color */
     margin-right: 10px; /* Space to separate team name from player info */
 }
+        .team-needs {
+    font-size: 0.8em; /* Smaller font size for team needs */
+    color: #555; /* Dim color for better readability */
+    margin-top: 2px; /* Space between team name and needs */
+}
     </style>
 </head>
 
@@ -252,7 +257,7 @@
             }
         }
 
-       function displayDraftOrder(teams) {
+function displayDraftOrder(teams) {
     const draftOrderContainer = document.getElementById('draftOrder');
     draftOrderContainer.innerHTML = ''; // Clear existing teams
 
@@ -261,9 +266,15 @@
         const team = teams[i];
         const teamDiv = document.createElement('div');
         teamDiv.className = 'team';
+        
+        // Team draft order, name and needs displayed
         teamDiv.innerHTML = `
-            ${team.draftOrder}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">
-            <div class="team-needs">Needs: ${team.needs}</div> <!-- Display team needs -->
+            <div>
+                ${team.draftOrder}: 
+                <span class="team-name">${team.name}</span>
+                <div class="team-needs">Needs: ${team.needs}</div> <!-- Display team needs -->
+            </div>
+            <img src="${team.logo}" alt="${team.name}" width="30"> <!-- Team logo -->
         `;
         
         // Add Edit button for each team
