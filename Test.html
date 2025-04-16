@@ -12,6 +12,7 @@
             justify-content: space-around;
             margin: 20px;
         }
+
         .column {
             width: 30%;
             padding: 20px;
@@ -19,9 +20,11 @@
             border-radius: 6px;
             background-color: #f9f9f9;
         }
+
         h2 {
             text-align: center;
         }
+
         .prospect,
         .team,
         .drafted {
@@ -32,18 +35,23 @@
             border-radius: 4px;
             transition: background-color 0.3s; /* Add transition for hover effects */
         }
+
         .prospect:hover {
             background-color: #d4d4d4; /* Change background on hover */
         }
+
         .drafted {
             background-color: #f0f0f0;
+            text-decoration: line-through;
         }
+
         .filter-buttons {
             display: flex;
             justify-content: space-between;
             flex-wrap: wrap; /* Wrap buttons on smaller screens */
             margin-bottom: 10px;
         }
+
         .filter-button {
             padding: 5px 10px;
             cursor: pointer;
@@ -52,74 +60,90 @@
             background-color: #e6e6e6;
             transition: background-color 0.3s;
             margin: 3px; /* Add some margin */
-            flex: 1 1 15%; /* Allow buttons to grow and take 45% width */
+            flex: 1 1 45%; /* Allow buttons to grow and take 45% width */
         }
+
         .filter-button.active {
             background-color: #b0b0b0; /* Different shade of grey for active buttons */
             color: white; /* Optional: Change text color when active for better contrast */
         }
+
         .edit-button {
             margin-left: 10px;
             cursor: pointer;
         }
+
         .player-name {
             cursor: pointer;
-            color: black;
+            color: blue;
             text-decoration: underline;
         }
+
         .prospect-content {
             display: flex;
             align-items: center;
             margin-bottom: 5px; /* Space between content */
         }
+
         .player-ranking {
-            font-size: 1.3em; /* Bigger font size for ranking */
+            font-size: 1.5em; /* Bigger font size for ranking */
             font-weight: bold; /* Bold ranking */
             margin-right: 10px; /* Space between ranking and name */
         }
+
         .player-details {
             display: flex;
-            flex-direction: column; /* Stack name vertically */
+            flex-direction: column; /* Stack name and metadata vertically */
         }
+
         .player-meta {
             font-size: 0.9em; /* Slightly smaller font for details */
             color: #555; /* Dim color for metadata */
         }
-                /* Draft results styles */
-.draft-result {
-    margin-bottom: 10px; /* Add space between draft entries */
-    border: 1px solid #aaa; /* Optional: border for each result */
-    padding: 10px; /* Padding inside each result */
-    border-radius: 4px; /* Rounded corners */
-    display: flex; /* Flex to align pick, team, and player info */
-    align-items: center; /* Center align items vertically */
-}
 
-.draft-result {
-    margin-bottom: 10px; /* Add space between draft entries */
-    border: 1px solid #aaa; /* Optional: border for each result */
-    padding: 10px; /* Padding inside each result */
-    border-radius: 4px; /* Rounded corners */
-    display: flex; /* Flex to align pick, team, and player info */
-    align-items: center; /* Center align items vertically */
-}
+        /* Draft results styles */
+        .draft-result {
+            margin-bottom: 10px; /* Add space between draft entries */
+            border: 1px solid #aaa; /* Optional: border for each result */
+            padding: 10px; /* Padding inside each result */
+            border-radius: 4px; /* Rounded corners */
+            display: flex; /* Use flex to align elements */
+            align-items: flex-start; /* Align items to the top */
+        }
 
-.draft-pick {
-    font-size: 1.3em; /* Bigger font size for draft pick */
-    font-weight: bold; /* Bold draft pick */
-    color: #333; /* Color for draft pick */
-    margin-right: 10px; /* Space to the right of the pick */
-}
+        .draft-pick {
+            font-size: 1.7em; /* Bigger font size for draft pick */
+            font-weight: bold; /* Bold draft pick */
+            color: #333; /* Color for draft pick */
+            margin-right: 10px; /* Space to the right of the pick */
+        }
 
-.team-name {
-    color: #333; /* Team name color */
-    margin-right: 10px; /* Space to separate team name from player info */
-}
-.team-needs {
-    font-size: 0.9em; /* Slightly smaller font for team needs */
-    color: #555;      /* Dim color for team needs */
-    margin-top: 5px; /* Spacing above the needs */
-}
+        .team-name {
+            font-size: 1.2em; /* Slightly bigger font for team name */
+            color: #444; /* Team name color */
+            margin-bottom: 5px; /* Space below team name */
+        }
+
+        .team-needs {
+            font-size: 0.9em; /* Slightly smaller font for team needs */
+            color: #555; /* Dim color for team needs */
+            margin-top: 5px; /* Spacing above the needs */
+        }
+
+        #undoPick {
+            padding: 10px;
+            background-color: #ff7777; /* A different color to indicate it's a critical button */
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            margin-bottom: 10px; /* Space below the button */
+            transition: background-color 0.3s; /* Smooth transition for hover effects */
+        }
+
+        #undoPick:hover {
+            background-color: #ff4d4d; /* Darker shade on hover */
+        }
         
     </style>
 </head>
@@ -258,32 +282,33 @@
             }
         }
 
-function displayDraftOrder(teams) {
-    const draftOrderContainer = document.getElementById('draftOrder');
-    draftOrderContainer.innerHTML = ''; // Clear existing teams
+       function displayDraftOrder(teams) {
+            const draftOrderContainer = document.getElementById('draftOrder');
+            draftOrderContainer.innerHTML = ''; // Clear existing teams
 
-    // Show only the specified number of rounds
-    for (let i = 0; i < Math.min(numRounds, teams.length); i++) {
-        const team = teams[i];
-        const teamDiv = document.createElement('div');
-        teamDiv.className = 'team';
-        teamDiv.innerHTML = `
-            <span>${team.draftOrder}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30"></span>
-            <div class="team-needs">${team.needs}</div>
-        `;
+            // Show only the specified number of rounds
+            for (let i = 0; i < Math.min(numRounds, teams.length); i++) {
+                const team = teams[i];
+                const teamDiv = document.createElement('div');
+                teamDiv.className = 'team';
+                teamDiv.innerHTML = `
+                    ${team.draftOrder}: <span class="team-name">${team.name}</span>
+                    <img src="${team.logo}" alt="${team.name}" width="30">
+                    <div class="team-needs">${team.needs}</div>
+                `;
 
-        // Add Edit button for each team
-        const editButton = document.createElement('button');
-        editButton.innerText = 'Edit';
-        editButton.className = 'edit-button';
-        editButton.onclick = () => showEditTeamNameDropdown(team, teamDiv);
-        
-        teamDiv.appendChild(editButton);
-        draftOrderContainer.appendChild(teamDiv);
-    }
-    // Automatically highlight next team for picking
-    highlightNextTeam();
-}
+                // Add Edit button for each team
+                const editButton = document.createElement('button');
+                editButton.innerText = 'Edit';
+                editButton.className = 'edit-button';
+                editButton.onclick = () => showEditTeamNameDropdown(team, teamDiv);
+                
+                teamDiv.appendChild(editButton);
+                draftOrderContainer.appendChild(teamDiv);
+            }
+            // Automatically highlight next team for picking
+            highlightNextTeam();
+        }
 
         function highlightNextTeam() {
             const teamDivs = document.querySelectorAll('.team');
