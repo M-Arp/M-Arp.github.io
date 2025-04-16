@@ -89,7 +89,7 @@
 .draft-result {
     margin-bottom: 10px; /* Add space between draft entries */
     border: 1px solid #aaa; /* Optional: border for each result */
-    padding: 10px; /* Padding inside each result */
+    padding: 5px; /* Padding inside each result */
     border-radius: 4px; /* Rounded corners */
     display: flex; /* Flex to align pick, team, and player info */
     align-items: center; /* Center align items vertically */
@@ -119,6 +119,7 @@
     font-size: 0.8em; /* Smaller font size for team needs */
     color: #555; /* Dim color for better readability */
     margin-top: 2px; /* Space between team name and needs */
+            padding: 0; /* Remove any unwanted padding */
 }
     </style>
 </head>
@@ -267,7 +268,7 @@ function displayDraftOrder(teams) {
         const teamDiv = document.createElement('div');
         teamDiv.className = 'team';
         teamDiv.innerHTML = `
-            ${team.draftOrder}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="20">
+            ${team.draftOrder}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="25">
             <div class="team-needs">Needs: ${team.needs}</div> <!-- Display team needs -->
         `;
         
