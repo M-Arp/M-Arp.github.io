@@ -198,10 +198,10 @@ fetch(teamsUrl)
     .then(data => {
         const jsonData = JSON.parse(data.substr(47).slice(0, -2));
         teams = jsonData.table.rows.map(row => ({
-            name: row.c[0]?.v,      // Team name
-            logo: row.c[1]?.v,      // Team logo URL
-            draftOrder: row.c[2]?.v, // Draft order
-            needs: row.c[3]?.v      // Team needs (new column)
+                    name: row.c[2]?.v,      // Team name
+                    logo: row.c[3]?.v,      // Team logo URL
+                    draftOrder: row.c[1]?.v // Draft order
+            needs: row.c[5]?.v      // Team needs (new column)
         }));
         displayDraftOrder(teams);
     })
