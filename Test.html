@@ -131,18 +131,22 @@
 }
 
 .team-info {
-    flex-grow: 1; /* Allow the team info to take available space */
     display: flex;
-    flex-direction: column; /* Stack team name, edit button, and needs */
+    flex-direction: column;
 }
 
 .team-name {
     font-size: 1.2em; /* Font size for team name */
     color: #444; /* Darker color for team name */
+    margin-right: 10px; /* Space between team name and edit button */
 }
 
 .edit-button {
-    margin: 5px 0; /* Space around the edit button */
+    margin: 0; /* Remove extra margin */
+}
+        .team-detail {
+    display: flex;
+    align-items: center; /* Center align team name and edit button */
 }
         
     </style>
@@ -299,8 +303,10 @@ function displayDraftOrder(teams) {
                 <img src="${team.logo}" alt="${team.name}" class="team-logo"> <!-- Team logo -->
             </div>
             <div class="team-info">
-                <span class="team-name">${team.name}</span>
-                <button class="edit-button" onclick="showEditTeamNameDropdown(team, teamDiv)">Edit</button>
+                <div class="team-detail">
+                    <span class="team-name">${team.name}</span>
+                    <button class="edit-button" onclick="showEditTeamNameDropdown(team, teamDiv)">Edit</button>
+                </div>
                 <div class="team-needs">Needs: ${team.needs}</div> <!-- Display team needs -->
             </div>
         `;
