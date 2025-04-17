@@ -305,14 +305,20 @@ function displayDraftOrder(teams) {
             <div class="team-info">
                 <div class="team-detail">
                     <span class="team-name">${team.name}</span>
-                    <button class="edit-button" onclick="showEditTeamNameDropdown(team, teamDiv)">Edit</button>
+                    <button class="edit-button">Edit</button>
                 </div>
                 <div class="team-needs">Needs: ${team.needs}</div> <!-- Display team needs -->
             </div>
         `;
-    
+
+        // Append the teamDiv to the draftOrderContainer
         draftOrderContainer.appendChild(teamDiv);
+        
+        // Set up event listener for the edit button after appending
+        const editButton = teamDiv.querySelector('.edit-button');
+        editButton.onclick = () => showEditTeamNameDropdown(team, teamDiv); // Attach the click event
     }
+
     // Automatically highlight the next team for picking
     highlightNextTeam();
 }
