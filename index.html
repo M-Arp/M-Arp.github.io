@@ -23,9 +23,8 @@
             text-align: center;
         }
         .prospect,
-        .team,
         .drafted {
-            padding: 10px;
+            padding: 5px;
             margin: 5px 0;
             background-color: #e0e0e0;
             border: 1px solid #ddd;
@@ -58,10 +57,7 @@
             background-color: #b0b0b0; /* Different shade of grey for active buttons */
             color: white; /* Optional: Change text color when active for better contrast */
         }
-        .edit-button {
-            margin-left: 10px;
-            cursor: pointer;
-        }
+
         .player-name {
             cursor: pointer;
             color: black;
@@ -73,7 +69,7 @@
             margin-bottom: 5px; /* Space between content */
         }
         .player-ranking {
-            font-size: 1.3em; /* Bigger font size for ranking */
+            font-size: 1.1em; /* Bigger font size for ranking */
             font-weight: bold; /* Bold ranking */
             margin-right: 10px; /* Space between ranking and name */
         }
@@ -89,32 +85,70 @@
 .draft-result {
     margin-bottom: 10px; /* Add space between draft entries */
     border: 1px solid #aaa; /* Optional: border for each result */
-    padding: 10px; /* Padding inside each result */
+    padding: 5px; /* Padding inside each result */
     border-radius: 4px; /* Rounded corners */
     display: flex; /* Flex to align pick, team, and player info */
     align-items: center; /* Center align items vertically */
 }
-
-.draft-result {
-    margin-bottom: 10px; /* Add space between draft entries */
-    border: 1px solid #aaa; /* Optional: border for each result */
-    padding: 10px; /* Padding inside each result */
-    border-radius: 4px; /* Rounded corners */
-    display: flex; /* Flex to align pick, team, and player info */
-    align-items: center; /* Center align items vertically */
-}
-
 .draft-pick {
-    font-size: 1.3em; /* Bigger font size for draft pick */
+    font-size: 1.1em; /* Bigger font size for draft pick */
     font-weight: bold; /* Bold draft pick */
     color: #333; /* Color for draft pick */
     margin-right: 10px; /* Space to the right of the pick */
 }
 
-.team-name {
-    color: #333; /* Team name color */
-    margin-right: 10px; /* Space to separate team name from player info */
+        .team-needs {
+    font-size: 0.8em; /* Smaller font size for team needs */
+    color: #555; /* Dim color for better readability */
+    margin-top: 2px; /* Space between team name and needs */
+            padding: 0; /* Remove any unwanted padding */
 }
+.team {
+    display: flex;
+    align-items: flex-start; /* Align items to the start for top alignment */
+    margin-bottom: 10px;  /* Space between team entries */
+    padding: 10px; /* Padding around each team */
+    border: 1px solid #ccc; /* Optional border */
+    border-radius: 5px; /* Rounded corners */
+    background-color: #f9f9f9; /* Background color for teams */
+}
+
+.draft-order-container {
+    display: flex; /* Use flexbox for the number and logo */
+    align-items: center; /* Center align elements vertically */
+    margin-right: 10px; /* Space to the right of the draft order */
+}
+
+.draft-order {
+    font-size: 1em; /* Larger font for draft order number */
+    font-weight: bold; /* Bold draft order number */
+    margin-right: 5px; /* Space between draft order and logo */
+}
+
+.team-logo {
+    width: 30px; /* Set logo width */
+    height: auto; /* Maintain aspect ratio */
+}
+
+.team-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.team-name {
+    font-size: 1em; /* Font size for team name */
+    color: #444; /* Darker color for team name */
+    margin-right: 10px; /* Space between team name and edit button */
+}
+
+.edit-button {
+    margin: 0; /* Remove extra margin */
+}
+        .team-detail {
+    display: flex;
+    align-items: center; /* Center align team name and edit button */
+}
+        
     </style>
 </head>
 
@@ -196,7 +230,8 @@
                 teams = jsonData.table.rows.map(row => ({
                     name: row.c[2]?.v,      // Team name
                     logo: row.c[3]?.v,      // Team logo URL
-                    draftOrder: row.c[1]?.v // Draft order
+                    draftOrder: row.c[1]?.v, // Draft order
+                    needs: row.c[5]?.v // Team needs (assuming it's stored in the 4th column)
                 }));
                 displayDraftOrder(teams);
             })
@@ -251,29 +286,42 @@
             }
         }
 
-        function displayDraftOrder(teams) {
-            const draftOrderContainer = document.getElementById('draftOrder');
-            draftOrderContainer.innerHTML = ''; // Clear existing teams
+function displayDraftOrder(teams) {
+    const draftOrderContainer = document.getElementById('draftOrder');
+    draftOrderContainer.innerHTML = ''; // Clear existing teams
 
-            // Show only the specified number of rounds
-            for (let i = 0; i < Math.min(numRounds, teams.length); i++) {
-                const team = teams[i];
-                const teamDiv = document.createElement('div');
-                teamDiv.className = 'team';
-                teamDiv.innerHTML = `${team.draftOrder}: <span class="team-name">${team.name}</span> <img src="${team.logo}" alt="${team.name}" width="30">`;
-                
-                // Add Edit button for each team
-                const editButton = document.createElement('button');
-                editButton.innerText = 'Edit';
-                editButton.className = 'edit-button';
-                editButton.onclick = () => showEditTeamNameDropdown(team, teamDiv);
-                
-                teamDiv.appendChild(editButton);
-                draftOrderContainer.appendChild(teamDiv);
-            }
-            // Automatically highlight next team for picking
-            highlightNextTeam();
-        }
+    // Show only the specified number of rounds
+    for (let i = 0; i < Math.min(numRounds, teams.length); i++) {
+        const team = teams[i];
+        const teamDiv = document.createElement('div');
+        teamDiv.className = 'team';
+
+        // Create the structure with flexbox for layout
+        teamDiv.innerHTML = `
+            <div class="draft-order-container">
+                <span class="draft-order">${team.draftOrder}</span>
+                <img src="${team.logo}" alt="${team.name}" class="team-logo"> <!-- Team logo -->
+            </div>
+            <div class="team-info">
+                <div class="team-detail">
+                    <span class="team-name">${team.name}</span>
+                    <button class="edit-button">Edit</button>
+                </div>
+                <div class="team-needs">Needs: ${team.needs}</div> <!-- Display team needs -->
+            </div>
+        `;
+
+        // Append the teamDiv to the draftOrderContainer
+        draftOrderContainer.appendChild(teamDiv);
+        
+        // Set up event listener for the edit button after appending
+        const editButton = teamDiv.querySelector('.edit-button');
+        editButton.onclick = () => showEditTeamNameDropdown(team, teamDiv); // Attach the click event
+    }
+
+    // Automatically highlight the next team for picking
+    highlightNextTeam();
+}
 
         function highlightNextTeam() {
             const teamDivs = document.querySelectorAll('.team');
