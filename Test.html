@@ -6,19 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NFL Mock Draft Builder</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: space-around;
-            margin: 20px;
-        }
-        .column {
-            width: 30%;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            background-color: #f9f9f9;
-        }
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: space-around;
+    margin: 20px;
+}
+
+.column {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    padding: 20px;
+}
+
+.column:nth-child(1) {
+    width: 25%; /* Narrow the Player Pool column */
+}
+
+.column:nth-child(2),
+.column:nth-child(3) {
+    width: 37.5%; /* Make the Draft Order and Draft Results columns wider */
+}
         h2 {
             text-align: center;
         }
