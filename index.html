@@ -6,19 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NFL Mock Draft Builder</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: space-around;
-            margin: 20px;
-        }
-        .column {
-            width: 30%;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            background-color: #f9f9f9;
-        }
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: space-around;
+    margin: 15px;
+}
+
+.column {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    padding: 15px;
+}
+
+.column:nth-child(1) {
+    width: 25%; /* Narrow the Player Pool column */
+}
+
+.column:nth-child(2),
+.column:nth-child(3) {
+    width: 37.5%; /* Make the Draft Order and Draft Results columns wider */
+}
         h2 {
             text-align: center;
         }
@@ -69,7 +78,7 @@
             margin-bottom: 5px; /* Space between content */
         }
         .player-ranking {
-            font-size: 1.1em; /* Bigger font size for ranking */
+            font-size: 1em; /* Bigger font size for ranking */
             font-weight: bold; /* Bold ranking */
             margin-right: 10px; /* Space between ranking and name */
         }
@@ -91,7 +100,7 @@
     align-items: center; /* Center align items vertically */
 }
 .draft-pick {
-    font-size: 1.1em; /* Bigger font size for draft pick */
+    font-size: 1em; /* Bigger font size for draft pick */
     font-weight: bold; /* Bold draft pick */
     color: #333; /* Color for draft pick */
     margin-right: 10px; /* Space to the right of the pick */
@@ -126,7 +135,7 @@
 }
 
 .team-logo {
-    width: 30px; /* Set logo width */
+    width: 25px; /* Set logo width */
     height: auto; /* Maintain aspect ratio */
 }
 
@@ -138,7 +147,7 @@
 .team-name {
     font-size: 1em; /* Font size for team name */
     color: #444; /* Darker color for team name */
-    margin-right: 10px; /* Space between team name and edit button */
+    margin-right: 5px; /* Space between team name and edit button */
 }
 
 .edit-button {
