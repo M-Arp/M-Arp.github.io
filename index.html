@@ -202,7 +202,7 @@ body {
        const playersSheetId = '1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY'; // Replace with your Players Google Sheet ID
         const teamsSheetId = '1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0'; // Replace with your Teams Google Sheet ID
 
-        const playersUrl = `https://docs.google.com/spreadsheets/d/1qrPbzYJUJv19sFZrt360QIrwyCmIdHSQBhK83jFvytY/gviz/tq?tqx=out:json`;
+        const playersUrl = `https://docs.google.com/spreadsheets/d/1r5-UN66a-DGc9RWyvAdTu-4FIfDP11-9CXLFgftiuXA/gviz/tq?tqx=out:json`;
         const teamsUrl = `https://docs.google.com/spreadsheets/d/1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0/gviz/tq?tqx=out:json`;
 
         let players = [];
@@ -224,7 +224,7 @@ body {
                     name: row.c[5]?.v,      // Player name
                     position: row.c[6]?.v,  // Player position
                     school: row.c[8]?.v,    // Player school
-                    ranking: row.c[1]?.v     // Player ranking
+                    ranking: row.c[0]?.v     // Player ranking
                 }));
                 filteredPlayers = players; // Initialize filtered players
                 displayPlayers(filteredPlayers);
