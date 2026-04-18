@@ -467,22 +467,35 @@ function undoLastPick() {
         const lastDraft = draftHistory.pop();
         const { player, team } = lastDraft;
 
-        // ... (rest of your code)
+        console.log('Undoing player:', player);
+        console.log('Undoing team:', team);
+        console.log('Before restoring, players:', players);
+        console.log('Before restoring, filteredPlayers:', filteredPlayers);
+        console.log('Current draftHistory length:', draftHistory.length);
 
-        // Reset filters and display filtered list
-        activeFilters.clear(); // or keep previous filters if needed
+        // Remove the last draft result from UI
+        const draftResultsContainer = document.getElementById('draftResults');
+        if (draftResultsContainer.firstChild) {
+            draftResultsContainer.removeChild(draftResultsContainer.firstChild);
+        }
+
+        // Add player back
+        players.push(player);
         filteredPlayers = [...players];
-        currentPlayerOffset = 0;
-        applyFilters();
+        currentPlayerOffset = 0; // Reset page
+        console.log('After restoring player, players:', players);
+        console.log('Filtered players:', filteredPlayers);
 
-        // Re-display draft order
+        sortPlayersByRanking();
+        displayPlayers(filteredPlayers);
+
+        // Add team back
+        teams.unshift(team);
         displayDraftOrder(teams);
 
         if (draftHistory.length === 0) {
             document.getElementById('undoPick').style.display = 'none';
         }
-
-        highlightNextTeam();
     }
 }
 
