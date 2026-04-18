@@ -475,7 +475,9 @@ function undoLastPick() {
 
         // Add the player back to the pool
         players.push(player); // Restore the player to the players pool
-        filteredPlayers = [...players]; // Reset filtered players to include the newly restored player
+        // Reset filteredPlayers and offset
+        filteredPlayers = [...players];
+        currentPlayerOffset = 0; // Reset page offset to show the full list
         sortPlayersByRanking(); // Sort players by ranking
         displayPlayers(filteredPlayers); // Update the display
 
@@ -487,6 +489,9 @@ function undoLastPick() {
         if (draftHistory.length === 0) {
             document.getElementById('undoPick').style.display = 'none';
         }
+
+        // Optional: highlight the next team
+        highlightNextTeam();
     }
 }
 
