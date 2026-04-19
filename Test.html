@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>NFL Mock Draft Builder</title>
 <style>
-/* Your styles here (keep your existing styles) */
 body {
     font-family: Arial, sans-serif;
     display: flex;
@@ -13,99 +13,128 @@ body {
     margin: 15px;
 }
 .column {
-    width: 30%;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    padding: 15px;
+}
+.column:nth-child(1) {
+    width: 25%;
+}
+.column:nth-child(2),
+.column:nth-child(3) {
+    width: 37.5%;
 }
 h2 {
     text-align: center;
 }
-.filter-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    justify-content: center;
-}
-#players {
-    height: 400px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
+.prospect,
+.drafted {
     padding: 5px;
-}
-.prospect {
-    border: 1px solid #ccc;
-    padding: 5px;
-    margin-bottom: 4px;
-    cursor: pointer;
+    margin: 5px 0;
+    background-color: #e0e0e0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: background-color 0.3s;
 }
 .prospect:hover {
-    background-color: #f0f0f0;
-}
-.player-ranking {
-    font-weight: bold;
-}
-.player-details {
-    font-size: 0.9em;
-}
-#draftResults {
-    height: 300px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    padding: 5px;
+    background-color: #d4d4d4;
 }
 .draft-result {
-    background-color: #eef;
-    padding: 4px;
-    margin-bottom: 4px;
+    margin-bottom: 10px;
+    border: 1px solid #aaa;
+    padding: 5px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+}
+.draft-pick {
+    font-size: 1em;
+    font-weight: bold;
+    color: #333;
+    margin-right: 10px;
+}
+.team-needs {
+    font-size: 0.8em;
+    color: #555;
+    margin-top: 2px;
+    padding: 0;
 }
 .team {
-    border: 1px solid #999;
-    padding: 4px;
-    margin: 4px 0;
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
 }
 .draft-order-container {
     display: flex;
     align-items: center;
-    gap: 8px;
+    margin-right: 10px;
+}
+.draft-order {
+    font-size: 1em;
+    font-weight: bold;
+    margin-right: 5px;
 }
 .team-logo {
-    width: 40px;
-    height: 40px;
+    width: 25px;
+    height: auto;
+}
+.team-info {
+    display: flex;
+    flex-direction: column;
+}
+.team-name {
+    font-size: 1em;
+    color: #444;
+    margin-right: 5px;
+}
+.edit-button {
+    margin: 0;
+}
+.team-detail {
+    display: flex;
+    align-items: center;
 }
 </style>
 </head>
+
 <body>
-
 <div class="column">
-    <h2>Player Pool</h2>
-    <div class="filter-buttons">
-        <button class="filter-button" onclick="toggleFilter('QB')">QB</button>
-        <button class="filter-button" onclick="toggleFilter('RB')">RB</button>
-        <button class="filter-button" onclick="toggleFilter('TE')">TE</button>
-        <button class="filter-button" onclick="toggleFilter('OT')">OT</button>
-        <button class="filter-button" onclick="toggleFilter('IOL')">IOL</button>
-        <button class="filter-button" onclick="toggleFilter('WR')">WR</button>
-        <button class="filter-button" onclick="toggleFilter('CB')">CB</button>
-        <button class="filter-button" onclick="toggleFilter('DT')">DT</button>
-        <button class="filter-button" onclick="toggleFilter('EDGE')">EDGE</button>
-        <button class="filter-button" onclick="toggleFilter('LB')">LB</button>
-        <button class="filter-button" onclick="toggleFilter('S')">S</button>
-        <button class="filter-button" onclick="toggleFilter('ST')">ST</button>
-        <button class="filter-button" onclick="resetFilter()">All</button>
-    </div>
-    <div id="players"></div>
+<h2>Player Pool</h2>
+<div class="filter-buttons">
+<button class="filter-button" onclick="toggleFilter('QB')">QB</button>
+<button class="filter-button" onclick="toggleFilter('RB')">RB</button>
+<button class="filter-button" onclick="toggleFilter('TE')">TE</button>
+<button class="filter-button" onclick="toggleFilter('OT')">OT</button>
+<button class="filter-button" onclick="toggleFilter('IOL')">IOL</button>
+<button class="filter-button" onclick="toggleFilter('WR')">WR</button>
+<button class="filter-button" onclick="toggleFilter('CB')">CB</button>
+<button class="filter-button" onclick="toggleFilter('DT')">DT</button>
+<button class="filter-button" onclick="toggleFilter('EDGE')">EDGE</button>
+<button class="filter-button" onclick="toggleFilter('LB')">LB</button>
+<button class="filter-button" onclick="toggleFilter('S')">S</button>
+<button class="filter-button" onclick="toggleFilter('ST')">ST</button>
+<button class="filter-button" onclick="resetFilter()">All</button>
+</div>
+<div id="players"></div>
 </div>
 
 <div class="column">
-    <h2>Draft Order</h2>
-    <label for="numRounds">Number of Draft Picks:</label>
-    <input type="number" id="numRounds" min="1" max="257" value="32" />
-    <button id="updateRounds">Update</button>
-    <div id="draftOrder"></div>
+<h2>Draft Order</h2>
+<label for="numRounds">Number of Draft Picks:</label>
+<input type="number" id="numRounds" min="1" max="257" value="32" />
+<button id="updateRounds">Update</button>
+<div id="draftOrder"></div>
 </div>
 
 <div class="column">
-    <h2>Draft Results</h2>
-    <button id="undoPick" style="display: none;">Undo Last Pick</button>
-    <div id="draftResults"></div>
+<h2>Draft Results</h2>
+<button id="undoPick" style="display: none;">Undo Last Pick</button>
+<div id="draftResults"></div>
 </div>
 
 <script>
@@ -153,16 +182,16 @@ fetch(teamsUrl)
     displayDraftOrder(teams);
   });
 
-// Original display function with pagination
-function displayPlayers(playersArray) {
+// Display function with pagination
+function displayPlayers(players) {
     const container = document.getElementById('players');
     container.innerHTML = '';
 
-    const start = currentPlayerOffset;
-    const end = Math.min(start + playersPerPage, playersArray.length);
+    const start = currentPlayerOffset * playersPerPage;
+    const end = Math.min(start + playersPerPage, players.length);
 
     for (let i = start; i < end; i++) {
-        const p = playersArray[i];
+        const p = players[i];
         const div = document.createElement('div');
         div.className = 'prospect';
 
@@ -185,9 +214,9 @@ function displayPlayers(playersArray) {
         playerMeta.className = 'player-meta';
         playerMeta.textContent = `${p.position} | ${p.school}`;
 
-        // Append
         playerDetails.appendChild(playerName);
         playerDetails.appendChild(playerMeta);
+
         prospectContent.appendChild(playerRanking);
         prospectContent.appendChild(playerDetails);
         div.appendChild(prospectContent);
@@ -196,12 +225,13 @@ function displayPlayers(playersArray) {
 }
 
 // Display draft order
-function displayDraftOrder(teamsData) {
+function displayDraftOrder(teams) {
     const container = document.getElementById('draftOrder');
     container.innerHTML = '';
-    const maxRounds = Math.min(numRounds, teamsData.length);
-    for (let i = 0; i < maxRounds; i++) {
-        const team = teamsData[i];
+
+    const maxRounds = Math.min(numRounds, teams.length);
+    for (let i=0; i<maxRounds; i++) {
+        const team = teams[i];
         const div = document.createElement('div');
         div.className = 'team';
         div.innerHTML = `
@@ -211,7 +241,7 @@ function displayDraftOrder(teamsData) {
             </div>
             <div class="team-info">
                 <div class="team-detail">
-                    <span class="team-name">${team.name}</span><br>
+                    <span class="team-name">${team.name}</span>
                     <button class="edit-button">Edit</button>
                 </div>
                 <div class="team-needs">Needs: ${team.needs}</div>
@@ -222,93 +252,35 @@ function displayDraftOrder(teamsData) {
     highlightNextTeam();
 }
 
-// Highlight current draft pick
 function highlightNextTeam() {
     const divs = document.querySelectorAll('.team');
-    divs.forEach((d, i) => {
-        d.style.fontWeight = (i === currentDraftPick) ? 'bold' : 'normal';
+    divs.forEach((d,i) => {
+        d.style.fontWeight = (i===currentDraftPick) ? 'bold' : 'normal';
     });
 }
 
-// Sorting players by ranking
-function sortPlayersByRanking() {
-    players.sort((a, b) => parseInt(a.ranking) - parseInt(b.ranking));
-}
-
-// Assign player to draft
-function assignPlayerToDraft(player) {
-    if (currentDraftPick >= teams.length) return;
-
-    const team = teams[currentDraftPick];
-
-    // Add to draft results
-    const draftDiv = document.createElement('div');
-    draftDiv.className = 'draft-result';
-    draftDiv.innerHTML = `
-        <span class="draft-pick">${team.draftOrder}</span>
-        <div>
-            <span class="team-name">${team.name}</span><br>
-            <span>${player.name} | <span class="player-position">${player.position} (#${player.ranking})</span></span>
-        </div>
-    `;
-    document.getElementById('draftResults').insertBefore(draftDiv, document.getElementById('draftResults').firstChild);
-
-    // Record draft for undo
-    draftHistory.push({ player, team });
-
-    // Remove player from pool
-    players = players.filter(p => p.name !== player.name);
-    filteredPlayers = filteredPlayers.filter(p => p.name !== player.name);
-    displayPlayers(filteredPlayers);
-
-    // Remove team from draft order
-    teams.splice(currentDraftPick, 1);
-    displayDraftOrder(teams);
-
-    // Next team
-    if (currentDraftPick >= teams.length) currentDraftPick = 0;
-    highlightNextTeam();
-
-    // Show undo button
-    document.getElementById('undoPick').style.display = 'inline-block';
-}
-
-// Undo last pick with reordering at top
-function undoLastPick() {
-    if (draftHistory.length === 0) return;
-
-    const last = draftHistory.pop();
-
-    // Remove last draft result from UI
-    const draftResultsDiv = document.getElementById('draftResults');
-    if (draftResultsDiv.firstChild) {
-        draftResultsDiv.removeChild(draftResultsDiv.firstChild);
+// Toggle filter
+function toggleFilter(pos) {
+    if (activeFilters.has(pos)) {
+        activeFilters.delete(pos);
+    } else {
+        activeFilters.add(pos);
     }
-
-    // Add the player back to the **top** of the pool
-    players.unshift(last.player);
-    // Update filteredPlayers
-    filteredPlayers = [...players];
-
-    // Re-sort by ranking
-    sortPlayersByRanking();
-
-    // Reset pagination offset
     currentPlayerOffset = 0;
-
-    // Redisplay the full list at the top
-    displayPlayers(filteredPlayers);
-
-    // Add team back to draft order
-    teams.unshift(last.team);
-    displayDraftOrder(teams);
-
-    if (draftHistory.length === 0) {
-        document.getElementById('undoPick').style.display = 'none';
-    }
+    applyFilters();
 }
 
-// Reset filters
+// Apply filters
+function applyFilters() {
+    if (activeFilters.size > 0) {
+        filteredPlayers = players.filter(p => activeFilters.has(p.position));
+    } else {
+        filteredPlayers = [...players];
+    }
+    displayPlayers(filteredPlayers);
+}
+
+// Reset filter
 function resetFilter() {
     activeFilters.clear();
     currentPlayerOffset = 0;
@@ -316,52 +288,79 @@ function resetFilter() {
     displayPlayers(filteredPlayers);
 }
 
-// Toggle filter
-function toggleFilter(position) {
-    if (activeFilters.has(position)) {
-        activeFilters.delete(position);
-    } else {
-        activeFilters.add(position);
+// Assign player
+function assignPlayerToDraft(player) {
+    if (currentDraftPick < teams.length) {
+        const team = teams[currentDraftPick];
+        const entry = document.createElement('div');
+        entry.className='draft-result';
+        entry.innerHTML= `
+            <span class="draft-pick">${team.draftOrder}</span>
+            <div>
+                <span class="team-name">${team.name}</span><br>
+                <span>${player.name} | <span class="player-position">${player.position} (#${player.ranking})</span></span>
+            </div>
+        `;
+        document.getElementById('draftResults').insertAdjacentElement('afterbegin', entry);
+
+        // Save for undo
+        draftHistory.push({ player: {...player}, team });
+
+        // Remove from pool
+        players = players.filter(p => p.name !== player.name);
+        filteredPlayers = filteredPlayers.filter(p => p.name !== player.name);
+        displayPlayers(filteredPlayers);
+
+        // Remove team from draft order
+        teams.splice(currentDraftPick,1);
+        // Adjust current pick if needed
+        if (currentDraftPick >= teams.length) currentDraftPick=0;
+        highlightNextTeam();
+
+        document.getElementById('undoPick').style.display='inline-block';
     }
-    applyFilters();
 }
 
-// Apply filters
-function applyFilters() {
-    if (activeFilters.size === 0) {
+function undoLastPick() {
+    if (draftHistory.length > 0) {
+        const last = draftHistory.pop();
+        const { player, team } = last;
+
+        // Remove last draft entry
+        const container = document.getElementById('draftResults');
+        if (container.firstChild) container.removeChild(container.firstChild);
+
+        // Add player back to top
+        players.unshift(player);
         filteredPlayers = [...players];
-    } else {
-        filteredPlayers = players.filter(p => activeFilters.has(p.position));
+        sortPlayersByRanking();
+        currentPlayerOffset=0;
+        displayPlayers(filteredPlayers);
+
+        // Add team back to start
+        teams.unshift(team);
+        displayDraftOrder(teams);
+
+        if (draftHistory.length===0) {
+            document.getElementById('undoPick').style.display='none';
+        }
     }
-    currentPlayerOffset = 0;
-    sortPlayersByRanking();
-    displayPlayers(filteredPlayers);
 }
 
-// Pagination controls (optional, if you add buttons)
-function nextPage() {
-    if (currentPlayerOffset + playersPerPage < filteredPlayers.length) {
-        currentPlayerOffset += playersPerPage;
-        displayPlayers(filteredPlayers);
-    }
-}
-function prevPage() {
-    if (currentPlayerOffset - playersPerPage >= 0) {
-        currentPlayerOffset -= playersPerPage;
-        displayPlayers(filteredPlayers);
-    }
+// Sorting
+function sortPlayersByRanking() {
+    players.sort((a,b) => parseInt(a.ranking) - parseInt(b.ranking));
 }
 
 // Event listeners
-document.getElementById('undoPick').addEventListener('click', undoLastPick);
-document.getElementById('updateRounds').addEventListener('click', () => {
-    const val = Number(document.getElementById('numRounds').value);
-    numRounds = Math.max(1, Math.min(257, val));
+document.getElementById('undoPick').onclick=undoLastPick;
+document.getElementById('updateRounds').onclick=()=> {
+    numRounds= Math.max(1, Math.min(257, Number(document.getElementById('numRounds').value)));
     displayDraftOrder(teams);
-});
+}
 
-// Initial display handled after fetches
+// Initial display
+// Already called after fetch
 </script>
-
 </body>
 </html>
