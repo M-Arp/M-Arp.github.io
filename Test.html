@@ -246,9 +246,20 @@ body {
             })
             .catch(error => console.error('Error fetching team data:', error));
 
-        function displayPlayers(players) {
-            const playersContainer = document.getElementById('players');
-            playersContainer.innerHTML = ''; // Clear existing players
+function displayPlayers(playersArray) {
+    const container = document.getElementById('players');
+    container.innerHTML = '';
+
+    for (let i = 0; i < playersArray.length; i++) {
+        const p = playersArray[i];
+        const div = document.createElement('div');
+        div.className = 'prospect';
+
+        // Simple display: name only
+        div.innerHTML = `<strong>${p.name}</strong> (${p.position}) - ${p.school}`;
+        container.appendChild(div);
+    }
+}
 
             // Only add players that fall within the currentPlayerOffset range
             const start = currentPlayerOffset * playersPerPage;
@@ -473,16 +484,28 @@ function undoLastPick() {
             draftResultsContainer.removeChild(draftResultsContainer.firstChild);
         }
 
-        // Add the player back to the pool
+        // Add the player back
         players.push(player);
 
-        // Add the team back to the draft order
+        // Add the team back
         teams.unshift(team);
 
-        // Reset filters to show all players
-        resetFilter();
+        // Reset filters and display all players
+        activeFilters.clear();
+        currentPlayerOffset = 0;
+        // Set filteredPlayers to full list
+        filteredPlayers = [...players];
 
-        // Hide undo button if no more history
+        // Sort players if needed
+        sortPlayersByRanking();
+
+        // Display all players
+        displayPlayers(filteredPlayers);
+
+        // Display the updated draft order
+        displayDraftOrder(teams);
+
+        // Hide undo button if no more undo steps
         if (draftHistory.length === 0) {
             document.getElementById('undoPick').style.display = 'none';
         }
