@@ -483,11 +483,10 @@ function undoLastPick() {
         players.push(player);
         filteredPlayers = [...players];
         currentPlayerOffset = 0; // Reset page
-        console.log('After restoring player, players:', players);
-        console.log('Filtered players:', filteredPlayers);
-
-        sortPlayersByRanking();
         displayPlayers(filteredPlayers);
+
+      //  sortPlayersByRanking();
+      //  displayPlayers(filteredPlayers);
 
         // Add team back
         teams.unshift(team);
