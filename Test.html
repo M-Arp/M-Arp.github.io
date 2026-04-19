@@ -479,14 +479,14 @@ function undoLastPick() {
             draftResultsContainer.removeChild(draftResultsContainer.firstChild);
         }
 
-        // Add player back
-        players.push(player);
-        filteredPlayers = [...players];
-        currentPlayerOffset = 0; // Reset page
-        displayPlayers(filteredPlayers);
-
-      //  sortPlayersByRanking();
-      //  displayPlayers(filteredPlayers);
+// After restoring the player array
+players.push(player); // Player added back
+// Reset filters and display
+activeFilters.clear(); // optional, if you want to show all
+filteredPlayers = [...players];
+currentPlayerOffset = 0; // reset to show first page
+sortPlayersByRanking();
+displayPlayers(filteredPlayers);
 
         // Add team back
         teams.unshift(team);
