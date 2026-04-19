@@ -173,13 +173,12 @@ body {
             <button class="filter-button" onclick="toggleFilter('IOL')">IOL</button>
             <button class="filter-button" onclick="toggleFilter('WR')">WR</button>
             <button class="filter-button" onclick="toggleFilter('CB')">CB</button>
-            <button class="filter-button" onclick="toggleFilter('DL')">DL</button>
+            <button class="filter-button" onclick="toggleFilter('DT')">DT</button>
             <button class="filter-button" onclick="toggleFilter('EDGE')">EDGE</button>
             <button class="filter-button" onclick="toggleFilter('LB')">LB</button>
             <button class="filter-button" onclick="toggleFilter('S')">S</button>
             <button class="filter-button" onclick="toggleFilter('ST')">ST</button>
             <button class="filter-button" onclick="resetFilter()">All</button> <!-- Reset button -->
-            <button id="restoreUndraftedBtn">Restore All Undrafted Players</button>
         </div>
         <div id="players"></div>  <!-- Player display -->
     </div>
@@ -215,52 +214,21 @@ body {
         let filteredPlayers = []; // To hold filtered player data
         let activeFilters = new Set(); // Set to track active filters
         let draftHistory = []; // Array to keep track of assigned players for undo functionality
-        
-        let initialPlayers = [];
 
-fetch(playersUrl)
-  .then(response => response.text())
-  .then(data => {
-    const jsonData = JSON.parse(data.substr(47).slice(0, -2));
-    players = jsonData.table.rows.map(row => ({
-      name: row.c[5]?.v,
-      position: row.c[6]?.v,
-      school: row.c[8]?.v,
-      ranking: row.c[0]?.v
-    }));
-    filteredPlayers = [...players];
-    initialPlayers = [...players]; // Save initial full list here
-    displayPlayers(filteredPlayers);
-  })
-  .catch(error => console.error('Error fetching player data:', error));
-
-// Add event listener for the restore button
-document.getElementById('restoreUndraftedBtn').addEventListener('click', () => {
-    const currentPlayerNames = new Set(players.map(p => p.name));
-    initialPlayers.forEach(p => {
-        if (!currentPlayerNames.has(p.name)) {
-            players.push(p);
-        }
-    });
-    filteredPlayers = [...players];
-    currentPlayerOffset = 0;
-    sortPlayersByRanking();
-    displayPlayers(filteredPlayers);
-});
         // Fetch players
-  //      fetch(playersUrl)
-    //        .then(response => response.text())
-      //      .then(data => {
-        //        const jsonData = JSON.parse(data.substr(47).slice(0, -2));
-          //      players = jsonData.table.rows.map(row => ({
-            //        name: row.c[5]?.v,      // Player name
-              //      position: row.c[6]?.v,  // Player position
-                  //  school: row.c[8]?.v,    // Player school
-                //    ranking: row.c[0]?.v     // Player ranking
-                //}));
-                //filteredPlayers = players; // Initialize filtered players
-                //displayPlayers(filteredPlayers);
-            //})
+        fetch(playersUrl)
+            .then(response => response.text())
+            .then(data => {
+                const jsonData = JSON.parse(data.substr(47).slice(0, -2));
+                players = jsonData.table.rows.map(row => ({
+                    name: row.c[5]?.v,      // Player name
+                    position: row.c[6]?.v,  // Player position
+                    school: row.c[8]?.v,    // Player school
+                    ranking: row.c[0]?.v     // Player ranking
+                }));
+                filteredPlayers = players; // Initialize filtered players
+                displayPlayers(filteredPlayers);
+            })
             .catch(error => console.error('Error fetching player data:', error));
 
         // Fetch teams
@@ -496,32 +464,29 @@ function assignPlayerToDraft(player) {
 
 function undoLastPick() {
     if (draftHistory.length > 0) {
-        const lastDraft = draftHistory.pop();
+        const lastDraft = draftHistory.pop(); // Get the last drafted player and team
         const { player, team } = lastDraft;
 
-        // Remove the last draft entry from UI
+        // Remove the most recent draft entry from the display
         const draftResultsContainer = document.getElementById('draftResults');
         if (draftResultsContainer.firstChild) {
-            draftResultsContainer.removeChild(draftResultsContainer.firstChild);
+            draftResultsContainer.removeChild(draftResultsContainer.firstChild); // Remove the latest draft entry
         }
 
-        // Add the player back
-        players.push(player);
-        // Reset the filtered list and page
-        filteredPlayers = [...players];
-        currentPlayerOffset = 0; // Reset to first page
-        sortPlayersByRanking();
-        displayPlayers(filteredPlayers);
+        // Add the player back to the pool
+        players.push(player); // Restore the player to the players pool
+        filteredPlayers = [...players]; // Reset filtered players to include the newly restored player
+        sortPlayersByRanking(); // Sort players by ranking
+        displayPlayers(filteredPlayers); // Update the display
 
-        // Add team back
-        teams.unshift(team);
-        displayDraftOrder(teams);
+        // Add the team back to the draft order
+        teams.unshift(team); // Reinsert the team at the start
+        displayDraftOrder(teams); // Refresh draft order display
 
+        // Hide the undo button if no picks left to undo
         if (draftHistory.length === 0) {
             document.getElementById('undoPick').style.display = 'none';
         }
-
-        highlightNextTeam();
     }
 }
 
