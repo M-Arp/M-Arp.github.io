@@ -464,10 +464,10 @@ function assignPlayerToDraft(player) {
 
 function undoLastPick() {
     if (draftHistory.length > 0) {
-        const lastDraft = draftHistory.pop(); // Get the last drafted player and team
+        const lastDraft = draftHistory.pop();
         const { player, team } = lastDraft;
 
-        // Remove the last draft entry from UI
+        // Remove last draft from UI
         const draftResultsContainer = document.getElementById('draftResults');
         if (draftResultsContainer.firstChild) {
             draftResultsContainer.removeChild(draftResultsContainer.firstChild);
@@ -475,22 +475,14 @@ function undoLastPick() {
 
         // Add the player back to the pool
         players.push(player);
-        // Reset filteredPlayers to full list
-        filteredPlayers = [...players];
-
-        // Reset offset to display from the beginning
-        currentPlayerOffset = 0;
-
-        // Sort players by ranking
-        sortPlayersByRanking();
-
-        // Display the full list again
-        displayPlayers(filteredPlayers);
 
         // Add the team back to the draft order
         teams.unshift(team);
-        displayDraftOrder(teams);
 
+        // Reset filters to show all players
+        resetFilter();
+
+        // Hide undo button if no more history
         if (draftHistory.length === 0) {
             document.getElementById('undoPick').style.display = 'none';
         }
