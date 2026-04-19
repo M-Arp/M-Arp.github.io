@@ -5,14 +5,71 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>NFL Mock Draft Builder</title>
 <style>
-/* Your existing styles... (omitted here for brevity, keep your styles as-is) */
+/* Your styles here (keep your existing styles) */
 body {
     font-family: Arial, sans-serif;
     display: flex;
     justify-content: space-around;
     margin: 15px;
 }
-/* ... rest of your styles ... */
+.column {
+    width: 30%;
+}
+h2 {
+    text-align: center;
+}
+.filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+}
+#players {
+    height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 5px;
+}
+.prospect {
+    border: 1px solid #ccc;
+    padding: 5px;
+    margin-bottom: 4px;
+    cursor: pointer;
+}
+.prospect:hover {
+    background-color: #f0f0f0;
+}
+.player-ranking {
+    font-weight: bold;
+}
+.player-details {
+    font-size: 0.9em;
+}
+#draftResults {
+    height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 5px;
+}
+.draft-result {
+    background-color: #eef;
+    padding: 4px;
+    margin-bottom: 4px;
+}
+.team {
+    border: 1px solid #999;
+    padding: 4px;
+    margin: 4px 0;
+}
+.draft-order-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.team-logo {
+    width: 40px;
+    height: 40px;
+}
 </style>
 </head>
 <body>
@@ -52,7 +109,7 @@ body {
 </div>
 
 <script>
-// Your existing data URLs and variables...
+// URLs for data
 const playersUrl = `https://docs.google.com/spreadsheets/d/1r5-UN66a-DGc9RWyvAdTu-4FIfDP11-9CXLFgftiuXA/gviz/tq?tqx=out:json`;
 const teamsUrl = `https://docs.google.com/spreadsheets/d/1PjanMWKX99obCsdfLzDDsk2-CvqHzerHaJzlRnxigj0/gviz/tq?tqx=out:json`;
 
@@ -96,16 +153,44 @@ fetch(teamsUrl)
     displayDraftOrder(teams);
   });
 
-// Simplified display function
+// Original display function with pagination
 function displayPlayers(playersArray) {
     const container = document.getElementById('players');
     container.innerHTML = '';
-    for (let i = 0; i < playersArray.length; i++) {
+
+    const start = currentPlayerOffset;
+    const end = Math.min(start + playersPerPage, playersArray.length);
+
+    for (let i = start; i < end; i++) {
         const p = playersArray[i];
         const div = document.createElement('div');
         div.className = 'prospect';
-        div.innerHTML = `<strong>${p.name}</strong> (${p.position}) - ${p.school}`;
-        div.onclick = () => assignPlayerToDraft(p);
+
+        const prospectContent = document.createElement('div');
+        prospectContent.className = 'prospect-content';
+
+        const playerRanking = document.createElement('div');
+        playerRanking.className = 'player-ranking';
+        playerRanking.textContent = p.ranking;
+
+        const playerDetails = document.createElement('div');
+        playerDetails.className = 'player-details';
+
+        const playerName = document.createElement('span');
+        playerName.className = 'player-name';
+        playerName.textContent = p.name;
+        playerName.onclick = () => assignPlayerToDraft(p);
+
+        const playerMeta = document.createElement('span');
+        playerMeta.className = 'player-meta';
+        playerMeta.textContent = `${p.position} | ${p.school}`;
+
+        // Append
+        playerDetails.appendChild(playerName);
+        playerDetails.appendChild(playerMeta);
+        prospectContent.appendChild(playerRanking);
+        prospectContent.appendChild(playerDetails);
+        div.appendChild(prospectContent);
         container.appendChild(div);
     }
 }
@@ -126,13 +211,12 @@ function displayDraftOrder(teamsData) {
             </div>
             <div class="team-info">
                 <div class="team-detail">
-                    <span class="team-name">${team.name}</span>
+                    <span class="team-name">${team.name}</span><br>
                     <button class="edit-button">Edit</button>
                 </div>
                 <div class="team-needs">Needs: ${team.needs}</div>
             </div>
         `;
-        // Add event for edit button if needed...
         container.appendChild(div);
     }
     highlightNextTeam();
@@ -146,7 +230,7 @@ function highlightNextTeam() {
     });
 }
 
-// Sorting function
+// Sorting players by ranking
 function sortPlayersByRanking() {
     players.sort((a, b) => parseInt(a.ranking) - parseInt(b.ranking));
 }
@@ -154,6 +238,7 @@ function sortPlayersByRanking() {
 // Assign player to draft
 function assignPlayerToDraft(player) {
     if (currentDraftPick >= teams.length) return;
+
     const team = teams[currentDraftPick];
 
     // Add to draft results
@@ -191,6 +276,7 @@ function assignPlayerToDraft(player) {
 // Undo last pick
 function undoLastPick() {
     if (draftHistory.length === 0) return;
+
     const last = draftHistory.pop();
 
     // Remove last draft result from UI
@@ -203,11 +289,14 @@ function undoLastPick() {
     players.push(last.player);
     // Reset filteredPlayers to full list
     filteredPlayers = [...players];
+
+    // Sort players again
+    sortPlayersByRanking();
+
     // Reset offset
     currentPlayerOffset = 0;
-    // Sort again
-    sortPlayersByRanking();
-    // Display all
+
+    // Display full list with pagination
     displayPlayers(filteredPlayers);
 
     // Add team back to draft order
@@ -219,7 +308,7 @@ function undoLastPick() {
     }
 }
 
-// Reset filters to show all
+// Reset filters
 function resetFilter() {
     activeFilters.clear();
     currentPlayerOffset = 0;
@@ -227,20 +316,53 @@ function resetFilter() {
     displayPlayers(filteredPlayers);
 }
 
-// Hook up undo button
-document.getElementById('undoPick').addEventListener('click', undoLastPick);
+// Toggle filter
+function toggleFilter(position) {
+    if (activeFilters.has(position)) {
+        activeFilters.delete(position);
+    } else {
+        activeFilters.add(position);
+    }
+    applyFilters();
+}
 
-// Optional: update rounds
+// Apply filters
+function applyFilters() {
+    if (activeFilters.size === 0) {
+        filteredPlayers = [...players];
+    } else {
+        filteredPlayers = players.filter(p => activeFilters.has(p.position));
+    }
+    currentPlayerOffset = 0;
+    sortPlayersByRanking();
+    displayPlayers(filteredPlayers);
+}
+
+// Pagination controls (if you have buttons, implement handlers)
+function nextPage() {
+    if (currentPlayerOffset + playersPerPage < filteredPlayers.length) {
+        currentPlayerOffset += playersPerPage;
+        displayPlayers(filteredPlayers);
+    }
+}
+function prevPage() {
+    if (currentPlayerOffset - playersPerPage >= 0) {
+        currentPlayerOffset -= playersPerPage;
+        displayPlayers(filteredPlayers);
+    }
+}
+
+// Event listeners
+document.getElementById('undoPick').addEventListener('click', undoLastPick);
 document.getElementById('updateRounds').addEventListener('click', () => {
     const val = Number(document.getElementById('numRounds').value);
     numRounds = Math.max(1, Math.min(257, val));
     displayDraftOrder(teams);
 });
 
-// Initial display
-// Already called after data fetch
-// displayPlayers(filteredPlayers);
-
+// Initial display after data loads
+// Already called after fetch
 </script>
+
 </body>
 </html>
