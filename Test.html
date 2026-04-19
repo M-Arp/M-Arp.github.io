@@ -273,6 +273,7 @@ function assignPlayerToDraft(player) {
     document.getElementById('undoPick').style.display = 'inline-block';
 }
 
+// Undo last pick with reordering at top
 function undoLastPick() {
     if (draftHistory.length === 0) return;
 
@@ -289,7 +290,7 @@ function undoLastPick() {
     // Update filteredPlayers
     filteredPlayers = [...players];
 
-    // Re-sort if desired
+    // Re-sort by ranking
     sortPlayersByRanking();
 
     // Reset pagination offset
@@ -337,7 +338,7 @@ function applyFilters() {
     displayPlayers(filteredPlayers);
 }
 
-// Pagination controls (if you have buttons, implement handlers)
+// Pagination controls (optional, if you add buttons)
 function nextPage() {
     if (currentPlayerOffset + playersPerPage < filteredPlayers.length) {
         currentPlayerOffset += playersPerPage;
@@ -359,8 +360,7 @@ document.getElementById('updateRounds').addEventListener('click', () => {
     displayDraftOrder(teams);
 });
 
-// Initial display after data loads
-// Already called after fetch
+// Initial display handled after fetches
 </script>
 
 </body>
