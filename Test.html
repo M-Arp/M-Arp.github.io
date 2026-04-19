@@ -273,7 +273,6 @@ function assignPlayerToDraft(player) {
     document.getElementById('undoPick').style.display = 'inline-block';
 }
 
-// Undo last pick
 function undoLastPick() {
     if (draftHistory.length === 0) return;
 
@@ -285,18 +284,18 @@ function undoLastPick() {
         draftResultsDiv.removeChild(draftResultsDiv.firstChild);
     }
 
-    // Add player back to pool
-    players.push(last.player);
-    // Reset filteredPlayers to full list
+    // Add the player back to the **top** of the pool
+    players.unshift(last.player);
+    // Update filteredPlayers
     filteredPlayers = [...players];
 
-    // Sort players again
+    // Re-sort if desired
     sortPlayersByRanking();
 
-    // Reset offset
+    // Reset pagination offset
     currentPlayerOffset = 0;
 
-    // Display full list with pagination
+    // Redisplay the full list at the top
     displayPlayers(filteredPlayers);
 
     // Add team back to draft order
