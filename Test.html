@@ -246,20 +246,9 @@ body {
             })
             .catch(error => console.error('Error fetching team data:', error));
 
-function displayPlayers(playersArray) {
-    const container = document.getElementById('players');
-    container.innerHTML = '';
-
-    for (let i = 0; i < playersArray.length; i++) {
-        const p = playersArray[i];
-        const div = document.createElement('div');
-        div.className = 'prospect';
-
-        // Simple display: name only
-        div.innerHTML = `<strong>${p.name}</strong> (${p.position}) - ${p.school}`;
-        container.appendChild(div);
-    }
-}
+        function displayPlayers(players) {
+            const playersContainer = document.getElementById('players');
+            playersContainer.innerHTML = ''; // Clear existing players
 
             // Only add players that fall within the currentPlayerOffset range
             const start = currentPlayerOffset * playersPerPage;
@@ -475,37 +464,26 @@ function assignPlayerToDraft(player) {
 
 function undoLastPick() {
     if (draftHistory.length > 0) {
-        const lastDraft = draftHistory.pop();
+        const lastDraft = draftHistory.pop(); // Get the last drafted player and team
         const { player, team } = lastDraft;
 
-        // Remove last draft from UI
+        // Remove the most recent draft entry from the display
         const draftResultsContainer = document.getElementById('draftResults');
         if (draftResultsContainer.firstChild) {
-            draftResultsContainer.removeChild(draftResultsContainer.firstChild);
+            draftResultsContainer.removeChild(draftResultsContainer.firstChild); // Remove the latest draft entry
         }
 
-        // Add the player back
-        players.push(player);
+        // Add the player back to the pool
+        players.push(player); // Restore the player to the players pool
+        filteredPlayers = [...players]; // Reset filtered players to include the newly restored player
+        sortPlayersByRanking(); // Sort players by ranking
+        displayPlayers(filteredPlayers); // Update the display
 
-        // Add the team back
-        teams.unshift(team);
+        // Add the team back to the draft order
+        teams.unshift(team); // Reinsert the team at the start
+        displayDraftOrder(teams); // Refresh draft order display
 
-        // Reset filters and display all players
-        activeFilters.clear();
-        currentPlayerOffset = 0;
-        // Set filteredPlayers to full list
-        filteredPlayers = [...players];
-
-        // Sort players if needed
-        sortPlayersByRanking();
-
-        // Display all players
-        displayPlayers(filteredPlayers);
-
-        // Display the updated draft order
-        displayDraftOrder(teams);
-
-        // Hide undo button if no more undo steps
+        // Hide the undo button if no picks left to undo
         if (draftHistory.length === 0) {
             document.getElementById('undoPick').style.display = 'none';
         }
